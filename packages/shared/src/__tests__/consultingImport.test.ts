@@ -264,6 +264,133 @@ describe("createPageDraftFromConsultingPacket", () => {
     expect(finalCta?.props.headline).toContain("Website Sprint");
   });
 
+  describe("FAQ fallback generation", () => {
+    it("uses explicit faq_items directly when provided", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        faq_items: [
+          { question: "How long does this take?", answer: "Typically two to three weeks." },
+          { question: "What do you need from us?", answer: "A 90-minute discovery session." },
+        ],
+      });
+      const faq = doc.sections.find((s) => s.type === "faq");
+      const faqSource = doc.metadata?.import_section_sources?.find((s) => s.section_type === "faq");
+
+      expect(faq?.props.items[0]?.question).toBe("How long does this take?");
+      expect(faq?.props.items).toHaveLength(2);
+      expect(faqSource?.sources).toContain("faq_items");
+      expect(faqSource?.used_fallback).toBe(false);
+    });
+
+    it("generates a multi-item fallback FAQ from audience and offer context", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        audience_summary: "Growing service firms with 10–50 staff.",
+        offer_summary: "A sprint to clarify positioning and structure the homepage.",
+        cta_options: [{ text: "Book a consultation", href: "/contact" }],
+      });
+      const faq = doc.sections.find((s) => s.type === "faq");
+
+      expect(faq?.props.items.length).toBeGreaterThanOrEqual(2);
+
+      const hasAudienceQ = faq?.props.items.some((item) => /who.*for/i.test(item.question));
+      expect(hasAudienceQ).toBe(true);
+
+      const hasNextStepQ = faq?.props.items.some((item) => /next step|what.*step/i.test(item.question));
+      expect(hasNextStepQ).toBe(true);
+    });
+
+    it("includes a proof caveat question when testimonials are flagged as missing", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        missing_assets: ["Approved testimonial: needed before proof section can be published"],
+        validation_warnings: ["Missing testimonials: use placeholder language only."],
+      });
+      const faq = doc.sections.find((s) => s.type === "faq");
+
+      const hasProofQ = faq?.props.items.some((item) => /testimonial|proof/i.test(item.question));
+      expect(hasProofQ).toBe(true);
+
+      const proofItem = faq?.props.items.find((item) => /testimonial|proof/i.test(item.question));
+      expect(proofItem?.answer).toMatch(/approved|verified/i);
+    });
+
+    it("includes a missing-assets question when assets are listed", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        missing_assets: ["Logo permission: needed before publishing", "Headshot: for trust section"],
+      });
+      const faq = doc.sections.find((s) => s.type === "faq");
+
+      const hasMissingQ = faq?.props.items.some((item) => /still need|outstanding|added/i.test(item.question));
+      expect(hasMissingQ).toBe(true);
+
+      const missingItem = faq?.props.items.find((item) => /still need|outstanding|added/i.test(item.question));
+      expect(missingItem?.answer).toMatch(/Logo permission|Headshot/i);
+    });
+
+    it("marks fallback FAQ as used_fallback and references packet sources", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        audience_summary: "Service firms.",
+        offer_summary: "A strategy sprint.",
+        missing_assets: ["Headshot needed"],
+      });
+      const faqSource = doc.metadata?.import_section_sources?.find((s) => s.section_type === "faq");
+
+      expect(faqSource?.used_fallback).toBe(true);
+      expect(faqSource?.sources).toContain("audience_summary");
+      expect(faqSource?.sources).toContain("missing_assets");
+      expect(faqSource?.sources).toContain("offer_summary");
+      expect(faqSource?.note).toMatch(/fallback/i);
+    });
+
+    it("fallback FAQ stays within the 4-item limit", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        audience_summary: "Growing service firms.",
+        offer_summary: "A focused sprint.",
+        cta_options: [{ text: "Book now", href: "/contact" }],
+        missing_assets: ["Testimonial needed", "Logo needed", "Headshot needed"],
+        validation_warnings: ["Missing testimonials: placeholder only."],
+      });
+      const faq = doc.sections.find((s) => s.type === "faq");
+
+      expect(faq?.props.items.length).toBeLessThanOrEqual(4);
+    });
+
+    it("fallback FAQ does not invent pricing, guarantees, or measurable outcomes", () => {
+      const doc = createPageDraftFromConsultingPacket({
+        company_name: "Acme",
+        offer_summary: "A focused strategy sprint to clarify positioning.",
+        missing_assets: ["Logo needed"],
+      });
+      const faq = doc.sections.find((s) => s.type === "faq");
+      const allText = faq?.props.items.map((i) => `${i.question} ${i.answer}`).join(" ") ?? "";
+
+      expect(allText).not.toMatch(/\$[\d,]+|ROI|guarantee|refund|\d+%|\d+ days/i);
+    });
+
+    it("produces a non-empty, useful fallback FAQ from the realistic fixture", () => {
+      const packet = ConsultingPacketImport.parse(loadFixture("../../fixtures/consulting-packet-import.realistic.json"));
+      const doc = createPageDraftFromConsultingPacket(packet, { idPrefix: "brightline" });
+      const faq = doc.sections.find((s) => s.type === "faq");
+      const faqSource = doc.metadata?.import_section_sources?.find((s) => s.section_type === "faq");
+
+      expect(faq?.props.items.length).toBeGreaterThanOrEqual(2);
+      expect(faq?.props.items.length).toBeLessThanOrEqual(4);
+      expect(faqSource?.used_fallback).toBe(true);
+      expect(faqSource?.note).toMatch(/fallback/i);
+
+      // Should not contain raw debug/internal text
+      const allText = faq?.props.items.map((i) => `${i.question} ${i.answer}`).join(" ") ?? "";
+      expect(allText).not.toMatch(/validation_warning|debug|internal/i);
+
+      // Page doc should still validate
+      expect(PageDoc.safeParse(doc).success).toBe(true);
+    });
+  });
+
   it("creates useful PageDoc from the realistic handoff fixture", () => {
     const packet = ConsultingPacketImport.parse(loadFixture("../../fixtures/consulting-packet-import.realistic.json"));
     const doc = createPageDraftFromConsultingPacket(packet, { idPrefix: "brightline" });

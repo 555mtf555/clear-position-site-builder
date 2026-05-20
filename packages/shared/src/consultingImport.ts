@@ -195,7 +195,9 @@ export function createPageDraftFromConsultingPacket(
       props: {
         eyebrow: "FAQ",
         headline: "Common questions before getting started.",
-        items: faqFrom(packet.faq_items),
+        items: packet.faq_items?.length
+          ? faqFrom(packet.faq_items)
+          : buildFaqFallback(packet, warnings),
       },
       elements: [],
     },
@@ -288,11 +290,19 @@ export function createPageDraftFromConsultingPacket(
     {
       section_id: `${prefix}_faq`,
       section_type: "faq",
-      sources: packet.faq_items?.length ? ["faq_items"] : [],
+      sources: packet.faq_items?.length
+        ? ["faq_items"]
+        : compact([
+            packet.missing_assets?.length ? "missing_assets" : undefined,
+            warnings.length ? "validation_warnings" : undefined,
+            text(packet.offer_summary) || text(packet.primary_offer) ? "offer_summary" : undefined,
+            text(packet.audience_summary) || text(packet.customer_problem) ? "audience_summary" : undefined,
+            hasCta(packet.cta_options) ? "cta_options" : undefined,
+          ]),
       used_fallback: !packet.faq_items?.length,
       note: packet.faq_items?.length
         ? "Generated from faq_items. Add or remove questions based on what buyers most commonly ask."
-        : "Fallback content used because no faq_items were provided. Replace with real buyer questions.",
+        : "Fallback FAQ generated from missing_assets, validation_warnings, and offer context. Review and replace with real buyer questions before publishing.",
     },
     {
       section_id: `${prefix}_final_cta`,
@@ -420,6 +430,77 @@ function faqFrom(input: Array<z.infer<typeof FaqItem>> | undefined) {
   return items.length > 0
     ? items
     : [{ question: "What should a visitor know before contacting you?", answer: "Edit this answer to address the most common question your buyer has before reaching out." }];
+}
+
+function buildFaqFallback(
+  packet: ConsultingPacketImport,
+  warnings: string[],
+): Array<{ question: string; answer: string }> {
+  const items: Array<{ question: string; answer: string }> = [];
+  const warningText = warnings.join(" ").toLowerCase();
+
+  // Q1: Who is this for? (buyer-facing orientation from audience or problem)
+  const audience = text(packet.audience_summary) ?? text(packet.customer_problem);
+  if (audience) {
+    items.push({
+      question: "Who is this for?",
+      answer: audience,
+    });
+  }
+
+  // Q2: What's the next step? (buyer-facing, grounded in real offer + CTA)
+  const offer = text(packet.offer_summary) ?? text(packet.primary_offer);
+  const cta = normalizeCta(packet.cta_options?.[0]);
+  if (offer) {
+    items.push({
+      question: "What's the next step?",
+      answer: `${offer} To get started, ${cta.text.charAt(0).toLowerCase() + cta.text.slice(1)}.`,
+    });
+  } else if (hasCta(packet.cta_options)) {
+    items.push({
+      question: "What's the next step?",
+      answer: `${cta.text} to discuss your goals and see if this is the right fit.`,
+    });
+  }
+
+  // Q3: Proof / testimonials caveat (only when explicitly flagged as missing or unverified)
+  const hasMissingTestimonials =
+    packet.missing_assets?.some((a) => /testimonial|quote/i.test(a)) ||
+    /testimonial|missing.*proof/i.test(warningText);
+  if (hasMissingTestimonials) {
+    items.push({
+      question: "Can this page use testimonials or proof claims?",
+      answer:
+        "Only approved proof should be used here. Add verified testimonials or results before publishing.",
+    });
+  }
+
+  // Q4: Missing assets — what still needs to be gathered
+  const assetLabels = (packet.missing_assets ?? [])
+    .map((a) => {
+      const label = a.split(":")[0]?.trim() ?? "";
+      return label ? label.charAt(0).toUpperCase() + label.slice(1) : null;
+    })
+    .filter((label): label is string => Boolean(label));
+  if (assetLabels.length > 0) {
+    items.push({
+      question: "What still needs to be added before this page is published?",
+      answer: `The following are still outstanding: ${assetLabels.join("; ")}. Gather these before the final review.`,
+    });
+  }
+
+  // Limit to 4 items.
+  const result = items.slice(0, 4);
+
+  // Final fallback when no contextual content could be found.
+  if (result.length === 0) {
+    return [{
+      question: "What should a visitor know before reaching out?",
+      answer: "Edit this answer to address the most common question your buyer has before getting started.",
+    }];
+  }
+
+  return result;
 }
 
 function normalizeCta(option: z.infer<typeof CtaOption> | string | undefined) {
