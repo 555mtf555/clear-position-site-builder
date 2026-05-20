@@ -150,6 +150,120 @@ describe("createPageDraftFromConsultingPacket", () => {
     expect(doc.metadata?.import_notes?.some((note) => note.includes("founder headshot"))).toBe(true);
   });
 
+  it("assigns visual variants to imported sections", () => {
+    const doc = createPageDraftFromConsultingPacket(richPacket, { idPrefix: "packet" });
+
+    const hero = doc.sections.find((s) => s.type === "hero");
+    const problem = doc.sections.find((s) => s.type === "problem");
+    const solution = doc.sections.find((s) => s.type === "solution");
+    const process = doc.sections.find((s) => s.type === "process");
+    const proof = doc.sections.find((s) => s.type === "proof");
+    const services = doc.sections.find((s) => s.type === "services");
+    const faq = doc.sections.find((s) => s.type === "faq");
+    const finalCta = doc.sections.find((s) => s.type === "final_cta");
+
+    // Hero and final_cta use their own background system — no content-layer variant.
+    expect(hero?.variant).toBeUndefined();
+    expect(finalCta?.variant).toBeUndefined();
+    // Content sections get polished defaults.
+    expect(problem?.variant).toBe("soft-card");
+    expect(solution?.variant).toBe("centered");
+    expect(process?.variant).toBe("centered");
+    expect(proof?.variant).toBe("minimal");
+    expect(services?.variant).toBe("soft-card");
+    expect(faq?.variant).toBe("minimal");
+  });
+
+  it("uses a different CTA for the final_cta when two CTA options are provided", () => {
+    const packet = ConsultingPacketImport.parse({
+      company_name: "Acme",
+      cta_options: [
+        { text: "Book a consultation", href: "/contact" },
+        { text: "See how it works", href: "/process" },
+      ],
+    });
+    const doc = createPageDraftFromConsultingPacket(packet);
+    const hero = doc.sections.find((s) => s.type === "hero");
+    const finalCta = doc.sections.find((s) => s.type === "final_cta");
+
+    expect(hero?.props.cta_text).toBe("Book a consultation");
+    expect(finalCta?.props.cta_text).toBe("See how it works");
+    expect(hero?.props.cta_text).not.toBe(finalCta?.props.cta_text);
+  });
+
+  it("uses the same CTA for hero and final_cta when only one option is provided", () => {
+    const doc = createPageDraftFromConsultingPacket(richPacket, { idPrefix: "packet" });
+    const finalCta = doc.sections.find((s) => s.type === "final_cta");
+
+    // richPacket has only one CTA option.
+    expect(finalCta?.props.cta_text).toBe("Book a consultation");
+  });
+
+  it("builds service cards from core_messages when no services field is present", () => {
+    const packet = ConsultingPacketImport.parse({
+      company_name: "Acme",
+      core_messages: ["First message", "Second message", "Third message"],
+    });
+    const doc = createPageDraftFromConsultingPacket(packet);
+    const services = doc.sections.find((s) => s.type === "services");
+    const serviceSource = doc.metadata?.import_section_sources?.find((s) => s.section_type === "services");
+
+    expect(services?.props.services[0]?.title).toBe("First message");
+    expect(services?.props.services).toHaveLength(3);
+    expect(serviceSource?.sources).toContain("core_messages");
+    expect(serviceSource?.note).toMatch(/core_messages/);
+    expect(serviceSource?.used_fallback).toBe(false);
+  });
+
+  it("deduplicates service cards with identical titles", () => {
+    const packet = ConsultingPacketImport.parse({
+      company_name: "Acme",
+      services: [
+        { title: "Sprint", description: "First" },
+        { title: "Sprint", description: "Duplicate" },
+        { title: "Build", description: "Third" },
+      ],
+    });
+    const doc = createPageDraftFromConsultingPacket(packet);
+    const services = doc.sections.find((s) => s.type === "services");
+    const titles = services?.props.services.map((s) => s.title);
+
+    expect(titles).toEqual(["Sprint", "Build"]);
+  });
+
+  it("does not create metric cards from non-numeric proof point strings", () => {
+    const doc = createPageDraftFromConsultingPacket({
+      company_name: "Acme",
+      proof_points: ["A qualitative statement with no numbers"],
+      validation_warnings: [],
+    });
+    const proof = doc.sections.find((s) => s.type === "proof");
+
+    expect(proof?.props.metrics).toHaveLength(0);
+  });
+
+  it("provides an actionable proof placeholder when no testimonials or proof points exist", () => {
+    const doc = createPageDraftFromConsultingPacket({ company_name: "Acme" });
+    const proof = doc.sections.find((s) => s.type === "proof");
+
+    expect(proof?.props.quote).toMatch(/approved|verified|testimonial/i);
+    expect(proof?.props.metrics).toHaveLength(0);
+  });
+
+  it("builds a company-specific final_cta headline when primary_offer is absent", () => {
+    const doc = createPageDraftFromConsultingPacket({ company_name: "Brightline" });
+    const finalCta = doc.sections.find((s) => s.type === "final_cta");
+
+    expect(finalCta?.props.headline).toContain("Brightline");
+  });
+
+  it("builds an offer-specific final_cta headline when primary_offer is present", () => {
+    const doc = createPageDraftFromConsultingPacket({ company_name: "Acme", primary_offer: "Website Sprint" });
+    const finalCta = doc.sections.find((s) => s.type === "final_cta");
+
+    expect(finalCta?.props.headline).toContain("Website Sprint");
+  });
+
   it("creates useful PageDoc from the realistic handoff fixture", () => {
     const packet = ConsultingPacketImport.parse(loadFixture("../../fixtures/consulting-packet-import.realistic.json"));
     const doc = createPageDraftFromConsultingPacket(packet, { idPrefix: "brightline" });
@@ -177,5 +291,24 @@ describe("createPageDraftFromConsultingPacket", () => {
     expect(process?.props.steps[0]?.title).toBe("Map the delivery flow and recurring escalation points");
     expect(proof?.props.metrics.some((metric) => `${metric.value} ${metric.label}`.includes("42%"))).toBe(false);
     expect(doc.metadata?.import_notes?.some((note) => note.includes("Numeric proof was omitted"))).toBe(true);
+
+    // Brightline has core_messages but no services → service cards from core_messages.
+    const services = doc.sections.find((section) => section.type === "services");
+    expect(services?.variant).toBe("soft-card");
+    expect(services?.props.services.length).toBeGreaterThan(0);
+    expect(services?.props.services[0]?.title).not.toBe("Primary offer");
+
+    // Realistic fixture has two CTA strings → hero and final_cta should use different ones.
+    const heroCta = hero?.props.cta_text;
+    const finalCtaSection = doc.sections.find((section) => section.type === "final_cta");
+    expect(heroCta).toBeTruthy();
+    expect(finalCtaSection?.props.cta_text).toBeTruthy();
+    // Both CTAs are valid; they differ because the fixture has two CTA options.
+    expect(finalCtaSection?.props.headline).toContain("Brightline");
+
+    // Tuned variants are set.
+    expect(doc.sections.find((s) => s.type === "problem")?.variant).toBe("soft-card");
+    expect(doc.sections.find((s) => s.type === "proof")?.variant).toBe("minimal");
+    expect(doc.sections.find((s) => s.type === "faq")?.variant).toBe("minimal");
   });
 });

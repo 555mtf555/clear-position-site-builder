@@ -78,7 +78,11 @@ export function createPageDraftFromConsultingPacket(
     ...(packet.missing_assets ?? []).map((asset) => `Missing asset: ${asset}`),
     ...(packet.brand_kit_suggestions ? ["Packet includes brand kit suggestions; review manually before applying."] : []),
   ];
-  const cta = normalizeCta(packet.cta_options?.[0]);
+
+  // Hero uses the strongest CTA option; final CTA uses the second when available to avoid repetition.
+  const heroCta = normalizeCta(packet.cta_options?.[0]);
+  const finalCtaOption = normalizeCta(packet.cta_options?.[1] ?? packet.cta_options?.[0]);
+
   const headline = firstText(packet.homepage_headlines)
     ?? text(packet.positioning_statement)
     ?? `${text(packet.company_name) ?? "Your business"} helps customers move forward with clarity.`;
@@ -92,6 +96,16 @@ export function createPageDraftFromConsultingPacket(
     importNotes.push("Numeric proof was omitted because validation warnings referenced unverified claims.");
   }
 
+  const builtServices = buildServices(packet);
+  const servicesFromCoreMessages = !packet.services?.length && Boolean(packet.core_messages?.length);
+  const servicesNote = packet.services?.length
+    ? "Generated from the services field."
+    : packet.core_messages?.length
+      ? "Generated from core_messages as placeholder service cards. Review and rename titles before publishing."
+      : text(packet.primary_offer) || text(packet.offer_summary)
+        ? "Generated from offer fields as a single service card."
+        : "Fallback content used — no services, messages, or offer content was provided.";
+
   const sectionSources: SectionSourceNote[] = [];
   const sections: Section[] = [
     {
@@ -100,9 +114,9 @@ export function createPageDraftFromConsultingPacket(
       props: {
         eyebrow: packet.project_name ?? packet.company_name,
         headline,
-        subhead: subhead || "A focused website draft generated from the approved strategy packet.",
-        cta_text: cta.text,
-        cta_href: cta.href,
+        subhead: subhead || "Edit this subhead to explain what makes this offer different and who it serves.",
+        cta_text: heroCta.text,
+        cta_href: heroCta.href,
         background_size: "cover",
         background_position: "center",
         text_align: "left",
@@ -112,6 +126,7 @@ export function createPageDraftFromConsultingPacket(
     {
       id: `${prefix}_problem`,
       type: "problem",
+      variant: "soft-card",
       props: {
         eyebrow: "The problem",
         headline: packet.customer_problem ?? "Customers need a clearer reason to choose you.",
@@ -125,10 +140,11 @@ export function createPageDraftFromConsultingPacket(
     {
       id: `${prefix}_solution`,
       type: "solution",
+      variant: "centered",
       props: {
         eyebrow: "The solution",
         headline: packet.primary_offer ?? "A clearer path from interest to action.",
-        body: packet.offer_summary ?? packet.positioning_statement ?? "This page turns the packet strategy into a structured buying story.",
+        body: packet.offer_summary ?? packet.positioning_statement ?? "Describe the key mechanism that makes this offer effective and how it helps your target customer.",
         bullets: safeStringArray(packet.core_messages, ["Clarify the audience", "Frame the offer", "Make the next step easy"]),
       },
       elements: [],
@@ -136,13 +152,14 @@ export function createPageDraftFromConsultingPacket(
     {
       id: `${prefix}_process`,
       type: "process",
+      variant: "centered",
       props: {
         eyebrow: "How it works",
         headline: "A simple process customers can understand.",
         steps: cardsFrom(packet.three_step_process, [
-          { title: "Clarify", description: "Confirm the audience, problem, and promise." },
-          { title: "Shape", description: "Turn the offer into sections that build trust." },
-          { title: "Act", description: "Give visitors a direct next step." },
+          { title: "Understand the need", description: "Confirm the customer's problem and what a good outcome looks like." },
+          { title: "Apply the method", description: "Describe the core approach and what makes it effective." },
+          { title: "Deliver the result", description: "Explain what customers receive and what changes for them." },
         ]).slice(0, 4),
       },
       elements: [],
@@ -150,6 +167,7 @@ export function createPageDraftFromConsultingPacket(
     {
       id: `${prefix}_proof`,
       type: "proof",
+      variant: "minimal",
       props: {
         eyebrow: "Proof",
         headline: "Reasons to believe the promise.",
@@ -162,18 +180,18 @@ export function createPageDraftFromConsultingPacket(
     {
       id: `${prefix}_services`,
       type: "services",
+      variant: "soft-card",
       props: {
         eyebrow: "Services",
         headline: "Ways to work together.",
-        services: cardsFrom(packet.services, [
-          { title: packet.primary_offer ?? "Primary offer", description: packet.offer_summary ?? "Describe the main service customers can buy." },
-        ]),
+        services: builtServices,
       },
       elements: [],
     },
     {
       id: `${prefix}_faq`,
       type: "faq",
+      variant: "minimal",
       props: {
         eyebrow: "FAQ",
         headline: "Common questions before getting started.",
@@ -185,10 +203,10 @@ export function createPageDraftFromConsultingPacket(
       id: `${prefix}_final_cta`,
       type: "final_cta",
       props: {
-        headline: `Ready to explore ${packet.primary_offer ?? "the next step"}?`,
+        headline: buildFinalCtaHeadline(packet),
         subhead: packet.offer_summary,
-        cta_text: cta.text,
-        cta_href: cta.href,
+        cta_text: finalCtaOption.text,
+        cta_href: finalCtaOption.href,
         background_size: "cover",
         background_position: "center",
         text_align: "center",
@@ -196,6 +214,7 @@ export function createPageDraftFromConsultingPacket(
       elements: [],
     },
   ];
+
   sectionSources.push(
     {
       section_id: `${prefix}_hero`,
@@ -206,7 +225,7 @@ export function createPageDraftFromConsultingPacket(
         hasCta(packet.cta_options) ? "cta_options" : undefined,
       ]),
       used_fallback: !hasText(packet.homepage_headlines) && !text(packet.positioning_statement),
-      note: "Hero generated from headline, positioning, audience, offer, and CTA packet fields.",
+      note: "Generated from homepage_headlines, positioning_statement, and cta_options. Edit the headline to match the final approved copy.",
     },
     {
       section_id: `${prefix}_problem`,
@@ -217,7 +236,7 @@ export function createPageDraftFromConsultingPacket(
         text(packet.audience_summary) ? "audience_summary" : undefined,
       ]),
       used_fallback: !text(packet.customer_problem) && !packet.pain_points?.length,
-      note: "Problem section generated from customer problem and pain-point fields.",
+      note: "Generated from customer_problem and pain_points. Review problem cards against the approved discovery findings.",
     },
     {
       section_id: `${prefix}_solution`,
@@ -228,14 +247,16 @@ export function createPageDraftFromConsultingPacket(
         packet.core_messages?.length ? "core_messages" : undefined,
       ]),
       used_fallback: !text(packet.primary_offer) && !text(packet.offer_summary) && !packet.core_messages?.length,
-      note: "Solution section generated from offer and core-message fields.",
+      note: "Generated from primary_offer, offer_summary, and core_messages. Edit bullets to match the final offer framing.",
     },
     {
       section_id: `${prefix}_process`,
       section_type: "process",
       sources: packet.three_step_process?.length ? ["three_step_process"] : [],
       used_fallback: !packet.three_step_process?.length,
-      note: "Process section generated from three_step_process or a safe default process.",
+      note: packet.three_step_process?.length
+        ? "Generated from three_step_process. Verify step descriptions match the approved delivery process."
+        : "Fallback content used because no three_step_process was provided. Replace with the real delivery steps.",
     },
     {
       section_id: `${prefix}_proof`,
@@ -248,25 +269,30 @@ export function createPageDraftFromConsultingPacket(
       used_fallback: (!packet.proof_points?.length && !packet.testimonials?.length) || proof.omittedRiskyProof,
       note: proof.omittedRiskyProof
         ? "Proof was simplified because validation warnings referenced unverified numeric claims."
-        : "Proof section generated from proof points and testimonials.",
+        : packet.testimonials?.length
+          ? "Generated from testimonials and proof points."
+          : "Fallback content used — no approved testimonials or proof points were provided. Add verified evidence before publishing.",
     },
     {
       section_id: `${prefix}_services`,
       section_type: "services",
       sources: compact([
         packet.services?.length ? "services" : undefined,
+        servicesFromCoreMessages ? "core_messages" : undefined,
         text(packet.primary_offer) ? "primary_offer" : undefined,
         text(packet.offer_summary) ? "offer_summary" : undefined,
       ]),
-      used_fallback: !packet.services?.length && !text(packet.primary_offer) && !text(packet.offer_summary),
-      note: "Services section generated from services and offer fields.",
+      used_fallback: !packet.services?.length && !packet.core_messages?.length && !text(packet.primary_offer) && !text(packet.offer_summary),
+      note: servicesNote,
     },
     {
       section_id: `${prefix}_faq`,
       section_type: "faq",
       sources: packet.faq_items?.length ? ["faq_items"] : [],
       used_fallback: !packet.faq_items?.length,
-      note: "FAQ section generated from faq_items or a safe placeholder question.",
+      note: packet.faq_items?.length
+        ? "Generated from faq_items. Add or remove questions based on what buyers most commonly ask."
+        : "Fallback content used because no faq_items were provided. Replace with real buyer questions.",
     },
     {
       section_id: `${prefix}_final_cta`,
@@ -277,7 +303,7 @@ export function createPageDraftFromConsultingPacket(
         text(packet.offer_summary) ? "offer_summary" : undefined,
       ]),
       used_fallback: !hasCta(packet.cta_options) && !text(packet.primary_offer),
-      note: "Final CTA generated from CTA and offer fields.",
+      note: "Generated from cta_options and offer fields. Uses a different CTA option from the hero where available.",
     },
   );
 
@@ -301,29 +327,74 @@ function buildProof(packet: ConsultingPacketImport, warnings: string[]) {
   const warningText = warnings.join(" ").toLowerCase();
   const avoidNumericProof = /unverified|unsupported|risky|claim|metric|proof|number/.test(warningText);
   let omittedRiskyProof = false;
+
   const metrics = (packet.proof_points ?? []).flatMap((item) => {
     if (typeof item === "string") {
-      if (avoidNumericProof && /\d/.test(item)) {
+      // Non-numeric proof strings are not metric cards — skip them.
+      if (!/\d/.test(item)) return [];
+      if (avoidNumericProof) {
         omittedRiskyProof = true;
         return [];
       }
-      return [{ value: "Proof", label: item }];
+      return [{ value: "—", label: item }];
     }
-    const value = text(item.value) ?? "Proof";
+    const value = text(item.value) ?? "";
     const label = text(item.label ?? item.description) ?? "Validated point";
+    // Skip items with no meaningful numeric value.
+    if (!value) return [];
     if (avoidNumericProof && /\d/.test(`${value} ${label}`)) {
       omittedRiskyProof = true;
       return [];
     }
     return [{ value, label }];
   });
+
   const testimonial = packet.testimonials?.map(normalizeTestimonial).find((item) => item.quote);
   return {
-    quote: testimonial?.quote ?? (metrics.length === 0 ? "Add a verified customer quote or proof point here." : undefined),
+    quote: testimonial?.quote ?? (metrics.length === 0 ? "Add an approved client quote here. The proof section is ready for a verified testimonial." : undefined),
     attribution: testimonial?.attribution,
     metrics,
     omittedRiskyProof,
   };
+}
+
+function buildServices(packet: ConsultingPacketImport): Array<{ title: string; description: string }> {
+  // 1. Use explicit services list when present.
+  if (packet.services?.length) {
+    return dedupeCards(cardsFrom(packet.services, []));
+  }
+  // 2. Fall back to core_messages as placeholder service topics.
+  if (packet.core_messages?.length) {
+    return packet.core_messages.slice(0, 3).map((msg) => ({
+      title: msg,
+      description: "Expand with specific deliverables and client outcomes.",
+    }));
+  }
+  // 3. Single card from offer fields.
+  if (text(packet.offer_summary) || text(packet.primary_offer)) {
+    return [{
+      title: text(packet.primary_offer) ?? "Core offer",
+      description: text(packet.offer_summary) ?? "Describe what customers receive and what changes as a result.",
+    }];
+  }
+  // 4. Minimal fallback.
+  return [{ title: "Core offer", description: "Describe the primary service or deliverable customers can choose." }];
+}
+
+function dedupeCards(cards: Array<{ title: string; description: string }>): Array<{ title: string; description: string }> {
+  const seen = new Set<string>();
+  return cards.filter((card) => {
+    const key = card.title.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildFinalCtaHeadline(packet: ConsultingPacketImport): string {
+  if (text(packet.primary_offer)) return `Ready to start with ${packet.primary_offer}?`;
+  if (text(packet.company_name)) return `Work with ${packet.company_name}.`;
+  return "Ready to take the next step?";
 }
 
 function cardsFrom(input: Array<z.infer<typeof TextCard> | string> | undefined, fallback: Array<{ title: string; description: string }>) {
@@ -348,7 +419,7 @@ function faqFrom(input: Array<z.infer<typeof FaqItem>> | undefined) {
     .filter((item): item is { question: string; answer: string } => Boolean(item.question && item.answer));
   return items.length > 0
     ? items
-    : [{ question: "What should visitors do next?", answer: "Replace this answer with the clearest next step from the packet." }];
+    : [{ question: "What should a visitor know before contacting you?", answer: "Edit this answer to address the most common question your buyer has before reaching out." }];
 }
 
 function normalizeCta(option: z.infer<typeof CtaOption> | string | undefined) {
