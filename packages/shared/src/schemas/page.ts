@@ -15,6 +15,7 @@ export const PageDoc = z.object({
   metadata: z.object({
     meta_title: z.string().min(1).optional(),
     meta_description: z.string().min(1).optional(),
+    meta_canonical: z.string().optional(),
     og_image_asset_id: Id.optional(),
     import_notes: z.array(z.string()).optional(),
     import_source: z.string().optional(),

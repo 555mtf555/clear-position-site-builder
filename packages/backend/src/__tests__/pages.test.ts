@@ -317,6 +317,82 @@ describe("Page export", () => {
     expect(JSON.stringify(manifest)).not.toContain(process.env.UPLOADS_DIR);
   });
 
+  it("exports an external CSS file and links it from the HTML", async () => {
+    const res = await request(app).post("/api/pages/page_home/export");
+
+    expect(res.status).toBe(200);
+
+    // External CSS file must exist.
+    const cssPath = path.join(res.body.export_path, "assets", "site.css");
+    expect(fs.existsSync(cssPath)).toBe(true);
+
+    // HTML must link the external file.
+    const html = fs.readFileSync(path.join(res.body.export_path, "index.html"), "utf8");
+    expect(html).toContain('<link rel="stylesheet" href="assets/site.css"');
+
+    // Static section styles go in the external file, not inline.
+    expect(html).not.toContain(".hero-section{");
+
+    // Brand variables remain inline so they load before the external sheet.
+    expect(html).toContain(":root{");
+  });
+
+  it("external CSS file contains static section styles and variant classes", async () => {
+    const res = await request(app).post("/api/pages/page_home/export");
+
+    expect(res.status).toBe(200);
+    const css = fs.readFileSync(path.join(res.body.export_path, "assets", "site.css"), "utf8");
+    expect(css).toContain(".hero-section");
+    expect(css).toContain(".content-section");
+    expect(css).toContain(".section--soft-card");
+    expect(css).toContain(".section--minimal");
+    expect(css).toContain("@media");
+  });
+
+  it("manifest includes cssFile pointing to site.css", async () => {
+    const res = await request(app).post("/api/pages/page_home/export");
+
+    expect(res.status).toBe(200);
+    const manifest = JSON.parse(fs.readFileSync(path.join(res.body.export_path, "export-manifest.json"), "utf8"));
+    expect(manifest.cssFile).toBe("assets/site.css");
+    expect(manifest.files).toContain("assets/site.css");
+  });
+
+  it("adds a canonical link when meta_canonical is set in page metadata", async () => {
+    const canonicalUrl = "https://example.com/my-page";
+    const created = await request(app).post("/api/pages").send({
+      site_id: "site_acme_core",
+      slug: "canonical-test",
+      title: "Canonical Test",
+      doc: {
+        version: 1,
+        metadata: {
+          meta_title: "Canonical Test",
+          meta_description: "Testing canonical URLs",
+          meta_canonical: canonicalUrl,
+        },
+        sections: [{
+          id: "h1",
+          type: "hero",
+          props: { headline: "Canonical", text_align: "left" },
+          elements: [],
+        }],
+      },
+    });
+
+    const exported = await request(app).post(`/api/pages/${created.body.id}/export`);
+    expect(exported.status).toBe(200);
+    const html = fs.readFileSync(path.join(exported.body.export_path, "index.html"), "utf8");
+    expect(html).toContain(`<link rel="canonical" href="${canonicalUrl}"`);
+  });
+
+  it("omits the canonical link when meta_canonical is not set", async () => {
+    const res = await request(app).post("/api/pages/page_home/export");
+
+    const html = fs.readFileSync(path.join(res.body.export_path, "index.html"), "utf8");
+    expect(html).not.toContain('rel="canonical"');
+  });
+
   it("missing metadata produces warnings instead of crashing", async () => {
     const res = await request(app).post("/api/pages/page_home/export");
 
@@ -391,7 +467,7 @@ describe("Page export", () => {
     const exported = await request(app).post(`/api/pages/${created.body.id}/export`);
 
     expect(exported.status).toBe(200);
-    const assetFile = exported.body.files_generated.find((file: string) => file.startsWith("assets/"));
+    const assetFile = exported.body.files_generated.find((file: string) => file.startsWith("assets/") && /\.(png|jpg|jpeg|webp|gif)$/i.test(file));
     expect(assetFile).toBeDefined();
     expect(fs.existsSync(path.join(exported.body.export_path, assetFile))).toBe(true);
     const html = fs.readFileSync(path.join(exported.body.export_path, "index.html"), "utf8");

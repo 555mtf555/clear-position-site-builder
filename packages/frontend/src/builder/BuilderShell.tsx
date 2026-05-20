@@ -113,9 +113,12 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
         </p>
         {editor.exportResult ? (
           <div className="export-status">
-            <strong>Export created</strong>
+            <strong>Export saved locally</strong>
             <span>{editor.exportResult.export_path}</span>
-            <span>{editor.exportResult.files_generated.length} files generated. Manifest: {editor.exportResult.manifest_path}</span>
+            <span>
+              {editor.exportResult.files_generated.length} file{editor.exportResult.files_generated.length === 1 ? "" : "s"} generated (HTML, CSS, and any images).
+              To publish, upload this folder to any static web host.
+            </span>
             {editor.exportResult.warnings.length > 0 ? (
               <ul>
                 {editor.exportResult.warnings.map((warning, index) => (
