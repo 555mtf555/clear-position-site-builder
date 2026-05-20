@@ -25,6 +25,8 @@ export function ProofInspector({
       <TextField label="Attribution" value={props.attribution ?? ""} onChange={(attribution) => onChange({ attribution })} />
       <RepeatedFieldList
         label="Metrics"
+        itemLabel="Metric"
+        emptyMessage="No proof metrics yet. Add verified results or leave this empty until proof is available."
         items={props.metrics}
         createItem={() => ({ value: "1x", label: "new metric" })}
         onChange={(metrics) => onChange({ metrics })}

@@ -24,6 +24,9 @@ export function SolutionInspector({
       <TextAreaField label="Body" value={props.body} rows={4} onChange={(body) => onChange({ body })} />
       <RepeatedFieldList
         label="Bullets"
+        itemLabel="Bullet"
+        guidance="Recommended: 3 bullet points"
+        emptyMessage="No bullet points yet. Add key selling points or benefits."
         items={props.bullets}
         createItem={() => "New bullet"}
         onChange={(bullets) => onChange({ bullets })}

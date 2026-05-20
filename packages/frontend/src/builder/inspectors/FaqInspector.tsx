@@ -23,6 +23,9 @@ export function FaqInspector({
       <TextAreaField label="Headline" value={props.headline} onChange={(headline) => onChange({ headline })} />
       <RepeatedFieldList
         label="Items"
+        itemLabel="FAQ item"
+        guidance="Recommended: 3–6 questions"
+        emptyMessage="No FAQ items yet. Add common questions buyers ask before getting started."
         items={props.items}
         createItem={() => ({ question: "New question?", answer: "Answer the question." })}
         onChange={(items) => onChange({ items })}

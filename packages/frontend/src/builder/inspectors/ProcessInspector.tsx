@@ -23,6 +23,9 @@ export function ProcessInspector({
       <TextAreaField label="Headline" value={props.headline} onChange={(headline) => onChange({ headline })} />
       <RepeatedFieldList
         label="Steps"
+        itemLabel="Step"
+        guidance="Recommended: 3 steps"
+        emptyMessage="No process steps yet. Add steps to explain how you deliver the work."
         items={props.steps}
         createItem={() => ({ title: "New step", description: "Describe this step." })}
         onChange={(steps) => onChange({ steps })}

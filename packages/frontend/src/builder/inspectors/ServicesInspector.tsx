@@ -23,6 +23,9 @@ export function ServicesInspector({
       <TextAreaField label="Headline" value={props.headline} onChange={(headline) => onChange({ headline })} />
       <RepeatedFieldList
         label="Services"
+        itemLabel="Service card"
+        guidance="Recommended: 3–6 service cards"
+        emptyMessage="No service cards yet. Add one to describe an offer."
         items={props.services}
         createItem={() => ({ title: "New service", description: "Describe this service." })}
         onChange={(services) => onChange({ services })}

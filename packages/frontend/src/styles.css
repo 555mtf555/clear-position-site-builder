@@ -814,8 +814,26 @@ textarea {
 
 .repeated-list__actions {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.repeated-list__guidance {
+  margin: 0 0 6px;
+  color: #677064;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.repeated-list__empty {
+  margin: 4px 0;
+  padding: 12px 14px;
+  border: 1px dashed #cdd6ca;
+  border-radius: 7px;
+  color: #677064;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .repeated-list__actions button {

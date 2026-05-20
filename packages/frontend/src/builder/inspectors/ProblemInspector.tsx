@@ -24,6 +24,9 @@ export function ProblemInspector({
       <TextAreaField label="Intro" value={props.intro ?? ""} onChange={(intro) => onChange({ intro })} />
       <RepeatedFieldList
         label="Problems"
+        itemLabel="Problem card"
+        guidance="Recommended: 3 problem cards"
+        emptyMessage="No problem cards yet. Add buyer pain points from the discovery findings."
         items={props.problems}
         createItem={() => ({ title: "New problem", description: "Describe the problem." })}
         onChange={(problems) => onChange({ problems })}

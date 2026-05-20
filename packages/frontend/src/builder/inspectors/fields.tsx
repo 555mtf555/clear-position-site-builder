@@ -121,19 +121,57 @@ export function moveItem<T>(items: T[], index: number, direction: "up" | "down")
   return next;
 }
 
+export function duplicateItem<T>(items: T[], index: number): T[] {
+  const item = items[index];
+  if (item === undefined) return items;
+  const copy = structuredClone(item) as T;
+  const next = [...items];
+  next.splice(index + 1, 0, copy);
+  return next;
+}
+
+function isItemPopulated(item: unknown): boolean {
+  if (typeof item === "string") return item.trim().length > 0;
+  if (item !== null && typeof item === "object") {
+    return Object.values(item as Record<string, unknown>).some(
+      (v) => typeof v === "string" && (v as string).trim().length > 0,
+    );
+  }
+  return false;
+}
+
 export function RepeatedFieldList<T>({
   label,
+  itemLabel,
   items,
   createItem,
   onChange,
   renderItem,
+  guidance,
+  emptyMessage,
 }: {
   label: string;
+  /** Singular label used in the item legend and confirm dialog. Defaults to auto-singularized `label`. */
+  itemLabel?: string;
   items: T[];
   createItem: () => T;
   onChange: (items: T[]) => void;
   renderItem: (item: T, index: number, updateItem: (nextItem: T) => void) => ReactNode;
+  /** Guidance hint shown below the header (e.g. "Recommended: 3 cards"). */
+  guidance?: string;
+  /** Message shown when the list is empty. */
+  emptyMessage?: string;
 }) {
+  const singular = itemLabel ?? (label.endsWith("s") ? label.slice(0, -1) : label);
+
+  function handleRemove(index: number) {
+    const item = items[index];
+    if (item !== undefined && isItemPopulated(item)) {
+      if (!window.confirm(`Remove this ${singular.toLowerCase()}?`)) return;
+    }
+    onChange(removeItem(items, index));
+  }
+
   return (
     <div className="repeated-list">
       <div className="repeated-list__header">
@@ -142,10 +180,16 @@ export function RepeatedFieldList<T>({
           Add item
         </button>
       </div>
+      {guidance ? <p className="repeated-list__guidance">{guidance}</p> : null}
+      {items.length === 0 ? (
+        <p className="repeated-list__empty">
+          {emptyMessage ?? `No ${label.toLowerCase()} yet. Add one to get started.`}
+        </p>
+      ) : null}
       <div className="repeated-list__items">
         {items.map((item, index) => (
           <fieldset className="repeated-list__item" key={index}>
-            <legend>{label} {index + 1}</legend>
+            <legend>{singular} {index + 1}</legend>
             {renderItem(item, index, (nextItem) => onChange(replaceItem(items, index, nextItem)))}
             <div className="repeated-list__actions">
               <button type="button" disabled={index === 0} onClick={() => onChange(moveItem(items, index, "up"))}>
@@ -154,7 +198,10 @@ export function RepeatedFieldList<T>({
               <button type="button" disabled={index === items.length - 1} onClick={() => onChange(moveItem(items, index, "down"))}>
                 Move down
               </button>
-              <button type="button" disabled={items.length <= 1} onClick={() => onChange(removeItem(items, index))}>
+              <button type="button" onClick={() => onChange(duplicateItem(items, index))}>
+                Duplicate
+              </button>
+              <button type="button" disabled={items.length <= 1} onClick={() => handleRemove(index)}>
                 Remove
               </button>
             </div>
