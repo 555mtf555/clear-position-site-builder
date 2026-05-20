@@ -1,0 +1,60 @@
+{
+  "company_name": "Brightline Operations",
+  "project_name": "Brightline Operations Website Messaging Sprint",
+  "positioning_statement": "Brightline Operations helps scaling B2B service companies replace founder-dependent delivery with simple operating systems their teams can actually use.",
+  "audience_summary": "Founder-led B2B service companies with 15-80 employees that have demand but inconsistent delivery, handoffs, and accountability.",
+  "customer_problem": "The founder is still the routing layer for delivery decisions, so client work depends on memory, meetings, and heroic follow-up instead of a visible operating system.",
+  "core_messages": [
+    "Make delivery visible before it becomes urgent",
+    "Give owners a weekly rhythm instead of another tool",
+    "Reduce founder bottlenecks without adding management theater"
+  ],
+  "offer_summary": "The Operating Rhythm Sprint documents the current delivery flow, installs a weekly operating cadence, and creates simple owner-ready dashboards.",
+  "homepage_headlines": [
+    "Stop being the routing layer for every delivery decision.",
+    "A clearer operating rhythm for scaling service teams.",
+    "Make delivery risk visible before it turns urgent."
+  ],
+  "cta_options": [
+    "Book an operating rhythm review",
+    "See how the sprint works"
+  ],
+  "three_step_process": [
+    "Map the delivery flow and recurring escalation points",
+    "Install a weekly owner rhythm and dashboard",
+    "Review risks, refine handoffs, and hand the system to the team"
+  ],
+  "proof_points": [
+    "42% fewer escalations after the first month",
+    "Approved client quote about weekly visibility"
+  ],
+  "homepage_section_outline": [
+    "Hero: Stop being the routing layer for every delivery decision.",
+    "Problem: Delivery depends on memory until something slips.",
+    "Solution: Install a weekly rhythm your team can keep using.",
+    "Proof: Use verified operating wins only."
+  ],
+  "missing_assets": [
+    "Approved client testimonial: Needed before proof section can use a named quote",
+    "Founder photo: Useful for trust section or about module",
+    "Client logo permissions: Logo strip should not be published until approved"
+  ],
+  "validation_warnings": [
+    "Unverified numeric claim: intake notes mention 42% fewer escalations, but no approved source was provided.",
+    "Missing testimonials: proof section should use placeholder language until a quote is approved.",
+    "Missing logo/brand photos: do not generate logo strip or founder imagery yet."
+  ],
+  "source_map": {
+    "business_name": "intake.business_name",
+    "project_name": "fixture.project_name",
+    "positioning_brief": "discovery.positioning_statement",
+    "target_audience": "discovery.target_audience",
+    "customer_problem_statement": "discovery.customer_problem",
+    "homepage_headline_options": "brand_story.headline_options",
+    "cta_options": "brand_story.cta_options",
+    "three_step_process": "brand_story.three_step_process",
+    "homepage_section_outline": "brand_story.homepage_copy_draft",
+    "missing_assets_and_questions": "operations.missing_assets",
+    "validation_warnings": "parent.validation"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "clear-position-site-builder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Schema-driven modular business website builder.",
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c green,cyan \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm -w @clear-position/backend run dev",
+    "dev:frontend": "npm -w @clear-position/frontend run dev",
+    "test": "npm -ws --if-present run test",
+    "typecheck": "npm -ws --if-present run typecheck",
+    "reset:db": "npm -w @clear-position/backend run reset:db"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

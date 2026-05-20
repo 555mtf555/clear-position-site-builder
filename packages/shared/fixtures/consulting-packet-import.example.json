@@ -1,0 +1,124 @@
+{
+  "company_name": "Northstar Advisory",
+  "project_name": "Northstar Advisory Homepage Draft",
+  "positioning_statement": "Northstar Advisory helps founder-led B2B service firms turn scattered expertise into a clear offer buyers can trust.",
+  "audience_summary": "Founder-led consulting and professional service teams with strong delivery but unclear public positioning.",
+  "customer_problem": "Prospects hear smart ideas but cannot quickly understand the offer, the buying path, or why now is the right time to act.",
+  "pain_points": [
+    {
+      "title": "The offer changes in every conversation",
+      "description": "Sales calls depend on long explanations because the website does not create a shared frame."
+    },
+    {
+      "title": "Proof is hard to scan",
+      "description": "Relevant wins exist, but they are buried in proposals, emails, and founder memory."
+    }
+  ],
+  "core_messages": [
+    "Turn expertise into a buyer-ready offer",
+    "Make the next step obvious",
+    "Use verified proof instead of inflated claims"
+  ],
+  "offer_summary": "A focused positioning and homepage sprint that turns the approved strategy packet into editable website sections.",
+  "primary_offer": "Positioning-to-Homepage Sprint",
+  "services": [
+    {
+      "title": "Positioning extraction",
+      "description": "Clarify the audience, problem, offer, and proof requirements from the approved packet."
+    },
+    {
+      "title": "Homepage structure",
+      "description": "Map the strategy into a practical homepage flow that can be edited in the builder."
+    },
+    {
+      "title": "Export-ready draft",
+      "description": "Produce JSON-driven page content that can be reviewed, edited, and exported."
+    }
+  ],
+  "homepage_headlines": [
+    "Make your expertise easier to understand and easier to buy.",
+    "A clearer homepage draft from your approved strategy packet."
+  ],
+  "cta_options": [
+    {
+      "text": "Book a consultation",
+      "href": "/contact"
+    },
+    "Review the strategy"
+  ],
+  "three_step_process": [
+    {
+      "title": "Clarify",
+      "description": "Confirm the buyer, problem, offer, and proof boundaries."
+    },
+    {
+      "title": "Shape",
+      "description": "Turn the packet into a section-by-section homepage draft."
+    },
+    {
+      "title": "Refine",
+      "description": "Edit the generated JSON in the builder before export."
+    }
+  ],
+  "proof_points": [
+    {
+      "value": "Verified",
+      "label": "Operators review claims before publishing",
+      "description": "The adapter preserves warnings instead of inventing stronger proof."
+    },
+    "Client quote needed before final proof section is published"
+  ],
+  "testimonials": [
+    {
+      "quote": "The homepage finally matched how we explain the work on calls.",
+      "attribution": "Approved client note"
+    }
+  ],
+  "faq_items": [
+    {
+      "question": "Can this draft be edited after import?",
+      "answer": "Yes. The adapter creates normal Page JSON that the builder editor can change and save."
+    },
+    {
+      "question": "Will brand kit suggestions overwrite the company brand?",
+      "answer": "No. Brand suggestions are shown for review and preserved as import notes."
+    }
+  ],
+  "homepage_section_outline": [
+    "hero: clear promise and CTA",
+    "problem: current buying confusion",
+    "solution: sprint offer framing",
+    "process: three-step delivery path",
+    "proof: verified quote and proof needs",
+    "services: service cards",
+    "faq: import and edit questions",
+    "final_cta: book consultation"
+  ],
+  "brand_kit_suggestions": {
+    "colors": {
+      "primary_color": "#0f766e",
+      "secondary_color": "#164e63",
+      "accent_color": "#f59e0b",
+      "background_color": "#f8fafc",
+      "text_color": "#111827",
+      "muted_text_color": "#4b5563",
+      "button_background": "#0f766e",
+      "button_text": "#ffffff"
+    },
+    "border_radius": 8
+  },
+  "missing_assets": [
+    "Founder headshot",
+    "Approved customer logo set"
+  ],
+  "validation_warnings": [
+    "Revenue lift metric mentioned in notes was unverified and should not be used as proof.",
+    "Customer logos are not approved for publication yet."
+  ],
+  "source_map": {
+    "positioning_statement": "consulting_os.packet.positioning.positioning_brief",
+    "homepage_headlines": "consulting_os.packet.copy.homepage_headline_options",
+    "cta_options": "consulting_os.packet.copy.cta_options",
+    "missing_assets": "consulting_os.packet.ops.missing_assets_and_questions"
+  }
+}

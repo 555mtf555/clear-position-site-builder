@@ -1,0 +1,10 @@
+node_modules
+dist
+*.log
+.env
+.env.local
+packages/backend/data/
+packages/backend/uploads/
+packages/backend/exports/
+.DS_Store
+Thumbs.db
