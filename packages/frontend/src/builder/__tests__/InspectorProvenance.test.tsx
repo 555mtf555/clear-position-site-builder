@@ -343,4 +343,57 @@ describe("Inspector import provenance", () => {
     expect(provenanceSummary).not.toBeNull();
     expect(provenanceSummary).toHaveClass("panel-summary-row");
   });
+
+  it("marks long provenance notes and section source notes with safe wrapping classes", () => {
+    const longToken = "source_" + "x".repeat(120);
+    const page: Page = {
+      ...importedPage,
+      doc: {
+        version: 1,
+        metadata: {
+          import_source: "consulting_packet",
+          import_company_name: `Company-${longToken}`,
+          import_notes: [
+            `Validation warning: ${longToken}`,
+            `Missing asset: https://example.com/assets/${longToken}.png`,
+          ],
+          import_section_sources: [
+            {
+              section_id: "hero_very_long_source",
+              section_type: "hero",
+              sources: [longToken],
+              used_fallback: false,
+              note: `Generated from ${longToken}`,
+            },
+          ],
+        },
+        sections: [],
+      },
+    };
+
+    render(
+      <Inspector
+        error={null}
+        isDirty={false}
+        onAssetDeleted={vi.fn()}
+        onReload={vi.fn()}
+        onSave={vi.fn()}
+        onUpdatePageMeta={vi.fn()}
+        onUpdatePageMetadata={vi.fn()}
+        onUpdateSection={vi.fn()}
+        page={page}
+        saveMessage={null}
+        saveStatus="idle"
+        section={null}
+        usedAssetIds={new Set()}
+        validationIssues={[]}
+      />,
+    );
+
+    const provenance = screen.getByText("Import provenance").closest("details");
+    expect(provenance).not.toBeNull();
+    expect(within(provenance!).getByText(`Validation warning: ${longToken}`)).toHaveClass("import-provenance__note");
+    expect(within(provenance!).getByText(`Missing asset: https://example.com/assets/${longToken}.png`)).toHaveClass("import-provenance__note");
+    expect(within(provenance!).getByText(/Sources:/).closest("li")).toHaveClass("import-provenance__source-note");
+  });
 });

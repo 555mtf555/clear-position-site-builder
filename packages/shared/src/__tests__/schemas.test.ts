@@ -105,6 +105,54 @@ describe("Page schema", () => {
     expect(missingText.success).toBe(false);
   });
 
+  it("accepts font_size_scale on a content section", () => {
+    const result = Section.safeParse({
+      id: "sec_services",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "A focused sprint." }],
+        font_size_scale: "large",
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "services") {
+      expect(result.data.props.font_size_scale).toBe("large");
+    }
+  });
+
+  it("accepts font_family_preset on a content section", () => {
+    const result = Section.safeParse({
+      id: "sec_faq",
+      type: "faq",
+      props: {
+        headline: "FAQ",
+        items: [{ question: "How?", answer: "Like this." }],
+        font_family_preset: "serif",
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "faq") {
+      expect(result.data.props.font_family_preset).toBe("serif");
+    }
+  });
+
+  it("rejects invalid font_size_scale values", () => {
+    const result = Section.safeParse({
+      id: "sec_services",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "A sprint." }],
+        font_size_scale: "enormous",
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("accepts a section with an optional variant", () => {
     const result = Section.safeParse({
       id: "sec_services",

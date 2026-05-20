@@ -2698,3 +2698,81 @@ details[open] .panel-summary-row > span:first-child::before {
     padding-right: 14px;
   }
 }
+
+/* ─── Typography scale classes ──────────────────────────────────────────── */
+
+/* compact: tighter type and less vertical padding */
+.section--font-size-compact {
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+.section--font-size-compact h2 {
+  font-size: 30px;
+  line-height: 1.12;
+}
+.section--font-size-compact .content-section__intro {
+  font-size: 15px;
+}
+.section--font-size-compact .section-card h3,
+.section--font-size-compact .step-card h3,
+.section--font-size-compact .faq-list h3 {
+  font-size: 16px;
+}
+.section--font-size-compact .section-card p,
+.section--font-size-compact .step-card p,
+.section--font-size-compact .faq-list p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* large: bigger headline and intro */
+.section--font-size-large h2 {
+  font-size: 48px;
+  line-height: 1.05;
+}
+.section--font-size-large .content-section__intro {
+  font-size: 20px;
+}
+.section--font-size-large .section-card h3,
+.section--font-size-large .step-card h3 {
+  font-size: 22px;
+}
+
+/* editorial: bold headline, generous spacing */
+.section--font-size-editorial {
+  padding-top: 104px;
+  padding-bottom: 104px;
+}
+.section--font-size-editorial h2 {
+  font-size: 56px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+.section--font-size-editorial .content-section__intro {
+  font-size: 21px;
+  line-height: 1.65;
+}
+
+/* ─── Typeface preset classes ────────────────────────────────────────────── */
+
+.section--font-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
+.section--font-serif h2,
+.section--font-serif h3 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.section--font-sans {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.section--font-display {
+  font-family: Impact, Anton, "Bebas Neue", sans-serif;
+}
+.section--font-display h2 {
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}

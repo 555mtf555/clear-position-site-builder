@@ -145,4 +145,31 @@ describe("structured repeated item inspectors", () => {
 
     expect(screen.getByText("Title is required.")).toBeInTheDocument();
   });
+
+  it("shows section style color controls and updates background color", () => {
+    let section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "One", description: "First service." }],
+      },
+      elements: [],
+    };
+
+    render(<ServicesInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanel = screen.getByText("Section style").closest("details")!;
+    expect(stylePanel).not.toHaveAttribute("open");
+    fireEvent.click(within(stylePanel).getByText("Section style"));
+    fireEvent.change(within(stylePanel).getByLabelText("Background color"), {
+      target: { value: "#f8fafc" },
+    });
+
+    expect(section.props.background_color).toBe("#f8fafc");
+    expect(within(stylePanel).getByLabelText("Text color")).toBeInTheDocument();
+    expect(validPageWith(section)).toBe(true);
+  });
 });

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\555mt\\\\Downloads\\\\faq-agent-app\\\\clear-position-site-builder\\\\packages\\\\frontend\\\\src\" -Recurse -File)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(npm -w packages/shared run test)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(sed -i 's/clsx\\(\"content-section\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ServicesSection.tsx)",
+      "Bash(sed -i 's/clsx\\(\"content-section\", \"content-section--problem\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", \"content-section--problem\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ProblemSection.tsx)",
+      "Bash(sed -i 's/clsx\\(\"content-section\", \"content-section--solution\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", \"content-section--solution\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' SolutionSection.tsx)",
+      "Bash(sed -i 's/clsx\\(\"content-section\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ProcessSection.tsx)",
+      "Bash(sed -i 's/clsx\\(\"content-section\", \"content-section--proof\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", \"content-section--proof\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ProofSection.tsx)",
+      "Bash(npm -w packages/backend run test)"
+    ]
+  }
+}

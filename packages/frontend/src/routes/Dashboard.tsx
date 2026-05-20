@@ -25,6 +25,7 @@ import {
   updateCompanyBrandKit,
   type CreateSiteInput,
 } from "../api/client";
+import { FieldHelp } from "./FieldHelp";
 
 interface DashboardProps {
   companyId: string;
@@ -262,19 +263,27 @@ function BrandKitPanel(props: {
   return (
     <section className="brand-kit-panel" aria-label="Brand kit">
       <form onSubmit={onSubmit} className="brand-kit-form">
-        <h2>Brand kit</h2>
+        <div className="dashboard-section-heading">
+          <h2>Brand kit</h2>
+          <FieldHelp label="Brand kit">
+            Shared colors used across this company's sites unless a section overrides them.
+          </FieldHelp>
+        </div>
         <div className="brand-kit-grid">
-          <ColorInput label="Primary" value={draft.colors.primary_color} onChange={(value) => updateColor("primary_color", value)} />
-          <ColorInput label="Secondary" value={draft.colors.secondary_color} onChange={(value) => updateColor("secondary_color", value)} />
-          <ColorInput label="Accent" value={draft.colors.accent_color} onChange={(value) => updateColor("accent_color", value)} />
-          <ColorInput label="Background" value={draft.colors.background_color} onChange={(value) => updateColor("background_color", value)} />
-          <ColorInput label="Text" value={draft.colors.text_color} onChange={(value) => updateColor("text_color", value)} />
-          <ColorInput label="Button background" value={draft.colors.button_background} onChange={(value) => updateColor("button_background", value)} />
-          <ColorInput label="Button text" value={draft.colors.button_text} onChange={(value) => updateColor("button_text", value)} />
+          <ColorInput label="Primary" help="Main brand color used for accents, section details, and emphasis." value={draft.colors.primary_color} onChange={(value) => updateColor("primary_color", value)} />
+          <ColorInput label="Secondary" help="Supporting brand color for contrast bands and secondary accents." value={draft.colors.secondary_color} onChange={(value) => updateColor("secondary_color", value)} />
+          <ColorInput label="Accent" help="Highlight color for small details like proof accents and visual emphasis." value={draft.colors.accent_color} onChange={(value) => updateColor("accent_color", value)} />
+          <ColorInput label="Background" help="Default page background color used when sections do not override it." value={draft.colors.background_color} onChange={(value) => updateColor("background_color", value)} />
+          <ColorInput label="Text" help="Default body text color used across rendered pages." value={draft.colors.text_color} onChange={(value) => updateColor("text_color", value)} />
+          <ColorInput label="Button background" help="Default CTA button fill color for rendered pages." value={draft.colors.button_background} onChange={(value) => updateColor("button_background", value)} />
+          <ColorInput label="Button text" help="Default CTA button text color for rendered pages." value={draft.colors.button_text} onChange={(value) => updateColor("button_text", value)} />
         </div>
         <div className="dashboard__row">
           <label>
-            Border radius
+            <span className="field-label-row">
+              Border radius
+              <FieldHelp label="Border radius">Controls the rounded corner style for rendered sections, cards, and buttons.</FieldHelp>
+            </span>
             <input
               type="number"
               min="0"
@@ -284,7 +293,10 @@ function BrandKitPanel(props: {
             />
           </label>
           <label>
-            Font preset
+            <span className="field-label-row">
+              Font preset
+              <FieldHelp label="Font preset">Sets the default font family for this company's rendered websites.</FieldHelp>
+            </span>
             <select value={draft.fonts.font_family} onChange={(event) => updateFont(event.target.value)}>
               <option value="Inter, system-ui, sans-serif">Inter/system</option>
               <option value="Georgia, serif">Editorial serif</option>
@@ -325,13 +337,17 @@ function BrandKitPanel(props: {
 
 function ColorInput(props: {
   label: string;
+  help: string;
   value: string;
   onChange: (value: string) => void;
 }) {
   const safePickerValue = /^#[0-9a-fA-F]{6}$/.test(props.value) ? props.value : "#000000";
   return (
     <div className="brand-color-field">
-      <span className="brand-color-field__label">{props.label}</span>
+      <span className="brand-color-field__label">
+        {props.label}
+        <FieldHelp label={props.label}>{props.help}</FieldHelp>
+      </span>
       <div className="brand-color-field__inputs">
         <input
           type="color"
@@ -395,7 +411,10 @@ function CreateSiteForm(props: {
       <h2>Create a site</h2>
       <div className="dashboard__row">
         <label>
-          Name
+          <span className="field-label-row">
+            Site name <span className="required-label">Required</span>
+            <FieldHelp label="Site name">The internal/display name for this website.</FieldHelp>
+          </span>
           <input
             type="text"
             value={name}
@@ -405,7 +424,10 @@ function CreateSiteForm(props: {
           />
         </label>
         <label>
-          Slug <span className="field-hint">lowercase letters and hyphens</span>
+          <span className="field-label-row">
+            Site slug <span className="required-label">Required</span>
+            <FieldHelp label="Site slug">Used in exported folder names and internal links. Use lowercase words with hyphens.</FieldHelp>
+          </span>
           <input
             type="text"
             value={slug}
@@ -416,7 +438,10 @@ function CreateSiteForm(props: {
           />
         </label>
         <label>
-          Type
+          <span className="field-label-row">
+            Site type
+            <FieldHelp label="Site type">Helps organize core, service, campaign, landing, or location sites.</FieldHelp>
+          </span>
           <select value={siteType} onChange={(event) => setSiteType(event.target.value as SiteType)}>
             {SITE_TYPES.map((type) => (
               <option key={type} value={type}>{type}</option>
@@ -432,6 +457,7 @@ function CreateSiteForm(props: {
             onChange={(event) => setIsCore(event.target.checked)}
           />
           Make this the core site (any existing core will be demoted)
+          <FieldHelp label="Core site designation">The main website for this company. Child sites can link back to it.</FieldHelp>
         </label>
         {!isCore && props.coreSiteId ? (
           <label>
@@ -441,6 +467,7 @@ function CreateSiteForm(props: {
               onChange={(event) => setLinkToCore(event.target.checked)}
             />
             Link to the current core site as parent
+            <FieldHelp label="Child-site linking">Use this when the new site should connect back to the core site.</FieldHelp>
           </label>
         ) : null}
       </div>
@@ -504,6 +531,9 @@ function SiteCard(props: {
           >
             Export site
           </button>
+          <FieldHelp label={`Export ${site.name}`}>
+            Creates local static HTML files. It does not publish the site online.
+          </FieldHelp>
         </div>
       </header>
 
@@ -518,6 +548,7 @@ function SiteCard(props: {
               void props.onRename(renameValue.trim()).then(() => setRenameOpen(false));
             }}
           >
+            <FieldHelp label="New site name">The internal/display name for this website.</FieldHelp>
             <input
               type="text"
               value={renameValue}
@@ -539,6 +570,7 @@ function SiteCard(props: {
               void props.onChangeSlug(slugValue.trim()).then(() => setSlugOpen(false));
             }}
           >
+            <FieldHelp label="New slug">Use lowercase letters, numbers, and hyphens only.</FieldHelp>
             <input
               type="text"
               value={slugValue}
@@ -552,7 +584,10 @@ function SiteCard(props: {
         ) : null}
 
         <label className="site-card__type">
-          Type
+          <span className="field-label-row">
+            Type
+            <FieldHelp label={`Site type for ${site.name}`}>Helps organize what this site is for.</FieldHelp>
+          </span>
           <select
             value={site.site_type}
             onChange={(event) => void props.onChangeType(event.target.value as SiteType)}
@@ -635,6 +670,12 @@ function CreatePageForm(props: {
       }}
       aria-label="Create page"
     >
+      <p className="compact-helper">Add a manual page to this site.</p>
+      <label>
+        <span className="field-label-row">
+          Page title <span className="required-label">Required</span>
+          <FieldHelp label="Page title">Shown in the builder and used for browser/export metadata.</FieldHelp>
+        </span>
       <input
         type="text"
         value={title}
@@ -643,6 +684,12 @@ function CreatePageForm(props: {
         required
         aria-label="Page title"
       />
+      </label>
+      <label>
+        <span className="field-label-row">
+          Page slug <span className="required-label">Required</span>
+          <FieldHelp label="Page slug">Used in the page URL/export folder. Use lowercase words with hyphens.</FieldHelp>
+        </span>
       <input
         type="text"
         value={slug}
@@ -652,6 +699,7 @@ function CreatePageForm(props: {
         required
         aria-label="Page slug"
       />
+      </label>
       <button type="submit" className="button" disabled={submitting}>
         {submitting ? "Creating..." : "Add page"}
       </button>
@@ -773,13 +821,19 @@ function ImportConsultingPacketForm(props: {
       </button>
       {!open ? (
         <p className="packet-import__helper">
-          Upload a <code>builder-import.json</code> from Consulting OS to generate a page from a strategy packet.
+          Upload <code>builder-import.json</code> from Consulting OS.
+          <FieldHelp label="Import Consulting Packet">
+            Upload the builder-import.json file exported from Consulting OS to generate editable page sections from a reviewed strategy packet.
+          </FieldHelp>
         </p>
       ) : null}
       {open ? (
         <form onSubmit={onSubmit} aria-label="Import Consulting Packet">
           <p className="packet-import__helper">
-            Upload the <code>builder-import.json</code> exported from Consulting OS, or paste the JSON below. An editable page with sections generated from the strategy packet will be created.
+            Upload <code>builder-import.json</code> from Consulting OS, or paste JSON below.
+            <FieldHelp label="Consulting packet import">
+              The import creates an editable page draft from approved strategy packet content. You can review sections before creating the page.
+            </FieldHelp>
           </p>
           <label className="packet-import__file">
             Upload builder-import.json from Consulting OS
@@ -802,7 +856,12 @@ function ImportConsultingPacketForm(props: {
             rows={6}
           />
           <div className="site-card__create-page">
-            <input
+            <label>
+              <span className="field-label-row">
+                Imported page title <span className="required-label">Required</span>
+                <FieldHelp label="Imported page title">Shown in the builder and used for browser/export metadata.</FieldHelp>
+              </span>
+              <input
               type="text"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
@@ -810,7 +869,13 @@ function ImportConsultingPacketForm(props: {
               required
               aria-label="Imported page title"
             />
-            <input
+            </label>
+            <label>
+              <span className="field-label-row">
+                Imported page slug <span className="required-label">Required</span>
+                <FieldHelp label="Imported page slug">Used in the page URL/export folder. Use lowercase words with hyphens.</FieldHelp>
+              </span>
+              <input
               type="text"
               value={slug}
               onChange={(event) => {
@@ -823,8 +888,12 @@ function ImportConsultingPacketForm(props: {
               required
               aria-label="Imported page slug"
             />
+            </label>
           </div>
-          <span className="field-hint">URL slug — lowercase letters and hyphens only (e.g. "acme-homepage")</span>
+          <span className="compact-helper">
+            URL slug: lowercase letters and hyphens only.
+            <FieldHelp label="URL slug format">Example: acme-homepage. Slugs must use lowercase letters, numbers, and hyphens.</FieldHelp>
+          </span>
           {duplicatePage ? (
             <p className="packet-import__warning" role="alert">
               Slug already exists. Suggested slug:{" "}

@@ -135,7 +135,7 @@ export function Inspector({
         <ProblemInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
       ) : null}
       {section?.type === "solution" ? (
-        <SolutionInspector section={section} onChange={onUpdateSection} onVariantChange={onVariantChange} />
+        <SolutionInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
       ) : null}
       {section?.type === "process" ? (
         <ProcessInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
@@ -331,7 +331,7 @@ function ImportProvenance({ page }: { page: Page }) {
             <strong>Section source notes</strong>
             <ul>
               {sectionSources.map((source) => (
-                <li key={source.section_id}>
+                <li className="import-provenance__source-note" key={source.section_id}>
                   <span>
                     <strong>{source.section_type}</strong>{" "}
                     {source.used_fallback ? "Fallback content" : "Packet content"}
@@ -354,7 +354,7 @@ function ProvenanceList({ title, items }: { title: string; items: string[] }) {
     <section>
       <strong>{title}</strong>
       <ul>
-        {items.map((item) => <li key={item}>{item}</li>)}
+        {items.map((item) => <li className="import-provenance__note" key={item}>{item}</li>)}
       </ul>
     </section>
   );

@@ -344,6 +344,16 @@ describe("Page export", () => {
     const css = fs.readFileSync(path.join(res.body.export_path, "assets", "site.css"), "utf8");
     expect(css).toContain(".hero-section");
     expect(css).toContain(".content-section");
+    expect(css).toContain("--cpsb-section-spacing");
+    expect(css).toContain("--cpsb-card-shadow");
+    expect(css).toContain(".final-cta-section:before");
+    expect(css).toContain(".check-list li:before{content:\"\"");
+    expect(css).toContain("overflow-wrap:anywhere");
+    expect(css).toContain("min-width:0");
+    expect(css).toContain("@media(min-width:681px) and (max-width:960px)");
+    expect(css).toContain("grid-template-columns:repeat(2,minmax(0,1fr))");
+    expect(css).toContain("@media(max-width:430px)");
+    expect(css).toContain(".hero-section__cta{width:100%");
     expect(css).toContain(".section--soft-card");
     expect(css).toContain(".section--minimal");
     expect(css).toContain("@media");
@@ -356,6 +366,14 @@ describe("Page export", () => {
     const manifest = JSON.parse(fs.readFileSync(path.join(res.body.export_path, "export-manifest.json"), "utf8"));
     expect(manifest.cssFile).toBe("assets/site.css");
     expect(manifest.files).toContain("assets/site.css");
+    expect(manifest.pages).toEqual([
+      expect.objectContaining({
+        pageId: "page_home",
+        slug: "home",
+        outputPath: "index.html",
+      }),
+    ]);
+    expect(manifest.unresolvedQaWarningCount).toBe(0);
   });
 
   it("adds a canonical link when meta_canonical is set in page metadata", async () => {
@@ -421,6 +439,41 @@ describe("Page export", () => {
     const html = fs.readFileSync(path.join(res.body.export_path, "index.html"), "utf8");
     expect(html).toContain("--cpsb-button-background:#123456");
     expect(html).toContain("--cpsb-border-radius:14px");
+  });
+
+  it("exports explicit content section background and text colors", async () => {
+    const created = await request(app).post("/api/pages").send({
+      site_id: "site_acme_core",
+      slug: "section-colors",
+      title: "Section Colors",
+      doc: {
+        version: 1,
+        metadata: {
+          meta_title: "Section Colors",
+          meta_description: "Testing section color overrides",
+        },
+        sections: [
+          {
+            id: "services_1",
+            type: "services",
+            props: {
+              headline: "Styled services",
+              background_color: "#f8fafc",
+              text_color: "#0f172a",
+              services: [{ title: "LongServiceName", description: "Description" }],
+            },
+            elements: [],
+          },
+        ],
+      },
+    });
+
+    const exported = await request(app).post(`/api/pages/${created.body.id}/export`);
+
+    expect(exported.status).toBe(200);
+    const html = fs.readFileSync(path.join(exported.body.export_path, "index.html"), "utf8");
+    expect(html).toContain('style="background-color: #f8fafc; color: #0f172a; --cpsb-text: #0f172a; --cpsb-muted-text: #0f172a"');
+    expect(html).toContain("Styled services");
   });
 
   it("copies referenced image assets and rewrites URLs to relative paths", async () => {
@@ -621,12 +674,21 @@ describe("Page export", () => {
     expect(pageHtml).toContain("Stop being the routing layer for every delivery decision.");
     expect(pageHtml).not.toContain("import_notes");
     expect(pageHtml).not.toContain("consulting_packet");
+    const pageManifest = JSON.parse(fs.readFileSync(path.join(pageExport.body.export_path, "export-manifest.json"), "utf8"));
+    expect(pageManifest.unresolvedQaWarningCount).toBe(0);
 
     const siteExport = await request(app).post("/api/sites/site_acme_core/export");
     expect(siteExport.status).toBe(200);
     expect(fs.existsSync(path.join(siteExport.body.export_path, "brightline-trial", "index.html"))).toBe(true);
     const sitePageHtml = fs.readFileSync(path.join(siteExport.body.export_path, "brightline-trial", "index.html"), "utf8");
     expect(sitePageHtml).toContain("Stop being the routing layer for every delivery decision.");
+    const siteManifest = JSON.parse(fs.readFileSync(path.join(siteExport.body.export_path, "export-manifest.json"), "utf8"));
+    expect(siteManifest.pages).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        slug: "brightline-trial",
+        outputPath: "brightline-trial/index.html",
+      }),
+    ]));
   });
 
   it("rejects invalid saved Page JSON", async () => {

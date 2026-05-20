@@ -1,7 +1,7 @@
 import type { ProblemSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
-import { SectionVariantField } from "./SectionVariantField";
+import { SectionStyleControls } from "./SectionStyleControls";
 
 export function ProblemInspector({
   section,
@@ -47,9 +47,12 @@ export function ProblemInspector({
       <details className="inspector-section">
         <summary>Section style</summary>
         <div className="inspector-section__body">
-          <SectionVariantField
-            value={section.variant}
-            onChange={onVariantChange ?? (() => {})}
+          <SectionStyleControls
+            variant={section.variant}
+            props={props}
+            validationIssues={validationIssues}
+            onChange={onChange}
+            onVariantChange={onVariantChange}
           />
         </div>
       </details>

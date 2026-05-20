@@ -290,6 +290,26 @@ describe("Dashboard", () => {
     });
   });
 
+  it("renders compact info bubbles and required labels for dashboard fields", async () => {
+    render(<Dashboard companyId="co_acme" />);
+
+    await screen.findByRole("heading", { name: "Brand kit" });
+    expect(screen.getByRole("button", { name: "More information about Brand kit" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More information about Site name" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More information about Site slug" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More information about Site type" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More information about Core site designation" })).toBeInTheDocument();
+    expect(screen.getByText(/Shared colors used across this company's sites/)).toHaveAttribute("role", "tooltip");
+    expect(screen.getAllByText("The internal/display name for this website.")[0]).toHaveAttribute("role", "tooltip");
+
+    const coreCard = await screen.findByLabelText("Site Acme - Core Site");
+    expect(within(coreCard).getByRole("button", { name: "More information about Page title" })).toBeInTheDocument();
+    expect(within(coreCard).getByRole("button", { name: "More information about Page slug" })).toBeInTheDocument();
+    expect(within(coreCard).getByText(/Shown in the builder and used for browser\/export metadata/)).toHaveAttribute("role", "tooltip");
+    expect(within(coreCard).getByText(/Used in the page URL\/export folder/)).toHaveAttribute("role", "tooltip");
+    expect(within(coreCard).getAllByText("Required").length).toBeGreaterThanOrEqual(2);
+  });
+
   it("validates pasted Consulting Packet JSON", async () => {
     render(<Dashboard companyId="co_acme" />);
 
@@ -507,6 +527,9 @@ describe("Dashboard", () => {
     const coreCard = await screen.findByLabelText("Site Acme - Core Site");
     fireEvent.click(within(coreCard).getByRole("button", { name: "Import Consulting Packet" }));
     expect(within(coreCard).getAllByText(/builder-import\.json/).length).toBeGreaterThan(0);
+    expect(within(coreCard).getByRole("button", { name: "More information about Consulting packet import" })).toBeInTheDocument();
+    expect(within(coreCard).getByRole("button", { name: "More information about Imported page title" })).toBeInTheDocument();
+    expect(within(coreCard).getByRole("button", { name: "More information about Imported page slug" })).toBeInTheDocument();
   });
 
   it("export site button carries a descriptive title for operators", async () => {
@@ -514,5 +537,16 @@ describe("Dashboard", () => {
     const coreCard = await screen.findByLabelText("Site Acme - Core Site");
     const exportBtn = within(coreCard).getByRole("button", { name: "Export site" });
     expect(exportBtn).toHaveAttribute("title", expect.stringMatching(/static HTML|publish/i));
+    expect(within(coreCard).getByRole("button", { name: "More information about Export Acme - Core Site" })).toBeInTheDocument();
+  });
+
+  it("renders site action controls inside the mobile-safe wrapping action group", async () => {
+    render(<Dashboard companyId="co_acme" />);
+    const coreCard = await screen.findByLabelText("Site Acme - Core Site");
+    const exportBtn = within(coreCard).getByRole("button", { name: "Export site" });
+    const actionGroup = exportBtn.closest(".site-card__actions");
+
+    expect(actionGroup).not.toBeNull();
+    expect(actionGroup).toHaveClass("site-card__actions");
   });
 });

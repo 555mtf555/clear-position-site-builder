@@ -48,6 +48,19 @@ const SectionBase = z.object({
   elements: z.array(Element).default([]),
 });
 
+export const FontSizeScale = z.enum(["default", "compact", "large", "editorial"]);
+export type FontSizeScale = z.infer<typeof FontSizeScale>;
+
+export const FontFamilyPreset = z.enum(["brand", "serif", "sans", "display"]);
+export type FontFamilyPreset = z.infer<typeof FontFamilyPreset>;
+
+const SectionStyleProps = z.object({
+  background_color: HexColor.optional(),
+  text_color: HexColor.optional(),
+  font_size_scale: FontSizeScale.optional(),
+  font_family_preset: FontFamilyPreset.optional(),
+});
+
 const Card = z.object({
   title: z.string().min(1, "Title is required."),
   description: z.string().min(1, "Description is required."),
@@ -74,7 +87,7 @@ export type HeroSection = z.infer<typeof HeroSectionSchema>;
 
 export const ProblemSectionSchema = SectionBase.extend({
   type: z.literal("problem"),
-  props: z.object({
+  props: SectionStyleProps.extend({
     eyebrow: OptionalText,
     headline: z.string().min(1, "Headline is required."),
     intro: OptionalText,
@@ -85,7 +98,7 @@ export type ProblemSection = z.infer<typeof ProblemSectionSchema>;
 
 export const SolutionSectionSchema = SectionBase.extend({
   type: z.literal("solution"),
-  props: z.object({
+  props: SectionStyleProps.extend({
     eyebrow: OptionalText,
     headline: z.string().min(1, "Headline is required."),
     body: z.string().min(1, "Body is required."),
@@ -96,7 +109,7 @@ export type SolutionSection = z.infer<typeof SolutionSectionSchema>;
 
 export const ProcessSectionSchema = SectionBase.extend({
   type: z.literal("process"),
-  props: z.object({
+  props: SectionStyleProps.extend({
     eyebrow: OptionalText,
     headline: z.string().min(1, "Headline is required."),
     steps: z.array(Card).min(1, "Add at least one step."),
@@ -106,7 +119,7 @@ export type ProcessSection = z.infer<typeof ProcessSectionSchema>;
 
 export const ProofSectionSchema = SectionBase.extend({
   type: z.literal("proof"),
-  props: z.object({
+  props: SectionStyleProps.extend({
     eyebrow: OptionalText,
     headline: z.string().min(1, "Headline is required."),
     quote: OptionalText,
@@ -121,7 +134,7 @@ export type ProofSection = z.infer<typeof ProofSectionSchema>;
 
 export const ServicesSectionSchema = SectionBase.extend({
   type: z.literal("services"),
-  props: z.object({
+  props: SectionStyleProps.extend({
     eyebrow: OptionalText,
     headline: z.string().min(1, "Headline is required."),
     services: z.array(Card).min(1, "Add at least one service."),
@@ -131,7 +144,7 @@ export type ServicesSection = z.infer<typeof ServicesSectionSchema>;
 
 export const FaqSectionSchema = SectionBase.extend({
   type: z.literal("faq"),
-  props: z.object({
+  props: SectionStyleProps.extend({
     eyebrow: OptionalText,
     headline: z.string().min(1, "Headline is required."),
     items: z.array(z.object({

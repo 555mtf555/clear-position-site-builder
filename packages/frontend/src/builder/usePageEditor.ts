@@ -26,6 +26,7 @@ function formatPath(path: Array<string | number>): string {
 function friendlyMessage(path: string, message: string): string {
   if (path.endsWith("headline")) return "Headline is required.";
   if (path.endsWith("background_color")) return "Background color must be a hex color like #0f172a.";
+  if (path.endsWith("text_color")) return "Text color must be a hex color like #0f172a.";
   if (path.endsWith("cta_href")) return "CTA href is required when CTA text is set.";
   if (path.endsWith("cta_text")) return "CTA text is required when CTA href is set.";
   if (path === "title") return "Page title is required.";

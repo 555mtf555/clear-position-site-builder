@@ -1,12 +1,13 @@
 import clsx from "clsx";
 import type { ProofSection as ProofSectionType } from "@clear-position/shared";
+import { sectionStyle, typographyClasses } from "../sectionStyle";
 
 export function ProofSection({ section }: { section: ProofSectionType }) {
   const { props } = section;
   const variant = section.variant ?? "default";
 
   return (
-    <section className={clsx("content-section", "content-section--proof", `section--${variant}`)}>
+    <section className={clsx("content-section", "content-section--proof", `section--${variant}`, ...typographyClasses(props))} style={sectionStyle(props)}>
       <div className="content-section__inner">
         {props.eyebrow ? <p className="content-section__eyebrow">{props.eyebrow}</p> : null}
         <h2>{props.headline}</h2>

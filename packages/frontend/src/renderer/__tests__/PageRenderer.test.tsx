@@ -189,10 +189,89 @@ describe("PageRenderer", () => {
     expect(section).toHaveClass("section--soft-card");
   });
 
+  it("applies font_size_scale CSS class when set on a section", () => {
+    const pageWithTypography: typeof page = {
+      ...page,
+      doc: {
+        ...page.doc,
+        sections: [
+          {
+            id: "services_typo",
+            type: "services",
+            props: {
+              headline: "Typography services",
+              services: [{ title: "Sprint", description: "Quick work." }],
+              font_size_scale: "large",
+            },
+            elements: [],
+          },
+        ],
+      },
+    };
+    render(<PageRenderer page={pageWithTypography} />);
+    const section = screen.getByRole("heading", { name: "Typography services" }).closest("section");
+    expect(section).toHaveClass("section--font-size-large");
+  });
+
+  it("applies font_family_preset CSS class when set on a section", () => {
+    const pageWithFont: typeof page = {
+      ...page,
+      doc: {
+        ...page.doc,
+        sections: [
+          {
+            id: "faq_font",
+            type: "faq",
+            props: {
+              headline: "Font FAQ",
+              items: [{ question: "Q?", answer: "A." }],
+              font_family_preset: "serif",
+            },
+            elements: [],
+          },
+        ],
+      },
+    };
+    render(<PageRenderer page={pageWithFont} />);
+    const section = screen.getByRole("heading", { name: "Font FAQ" }).closest("section");
+    expect(section).toHaveClass("section--font-serif");
+  });
+
   it("keeps explicit section background styles over brand defaults", () => {
     render(<PageRenderer page={page} brandKit={brandKit} />);
 
     const finalCta = screen.getByRole("heading", { name: "Ready to start?" }).closest("section");
     expect(finalCta).toHaveStyle({ backgroundColor: "#255741" });
+  });
+
+  it("applies explicit background and text colors on content sections", () => {
+    const pageWithContentColors: typeof page = {
+      ...page,
+      doc: {
+        ...page.doc,
+        sections: [
+          {
+            id: "services_colors",
+            type: "services",
+            props: {
+              headline: "Styled services",
+              background_color: "#f8fafc",
+              text_color: "#0f172a",
+              services: [{ title: "Sprint", description: "Quick focused work." }],
+            },
+            elements: [],
+          },
+        ],
+      },
+    };
+
+    render(<PageRenderer page={pageWithContentColors} brandKit={brandKit} />);
+    const section = screen.getByRole("heading", { name: "Styled services" }).closest("section");
+
+    expect(section).toHaveStyle({
+      backgroundColor: "#f8fafc",
+      color: "#0f172a",
+      "--cpsb-text": "#0f172a",
+    });
   });
 });
