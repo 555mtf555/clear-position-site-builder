@@ -72,6 +72,7 @@ export type ItemTextWeight = z.infer<typeof ItemTextWeight>;
 
 export const TextStyle = z.object({
   color: HexColor.optional(),
+  background_color: HexColor.optional(),
   size: ItemTextSize.optional(),
   font: FontFamilyPreset.optional(),
   weight: ItemTextWeight.optional(),

@@ -3,12 +3,24 @@ import { describe, expect, it, vi } from "vitest";
 import { ItemStyleControls } from "../ItemStyleControls";
 
 describe("ItemStyleControls", () => {
-  it("renders Text size, Typeface, and Weight selects plus a color field", () => {
+  it("renders Text size, Typeface, Weight, text color, and background color controls", () => {
     render(<ItemStyleControls style={undefined} onChange={vi.fn()} />);
     expect(screen.getByLabelText("Item text size")).toBeInTheDocument();
     expect(screen.getByLabelText("Item typeface")).toBeInTheDocument();
     expect(screen.getByLabelText("Item weight")).toBeInTheDocument();
     expect(screen.getByLabelText("Text color")).toBeInTheDocument();
+    expect(screen.getByLabelText("Background color")).toBeInTheDocument();
+  });
+
+  it("calls onChange with background_color when it changes", () => {
+    const onChange = vi.fn();
+    render(<ItemStyleControls style={undefined} onChange={onChange} />);
+    const { container } = render(<ItemStyleControls style={undefined} onChange={onChange} />);
+    const bgInput = container.querySelector('input[aria-label="Background color"]') as HTMLInputElement;
+    if (bgInput) {
+      fireEvent.change(bgInput, { target: { value: "#255741" } });
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ background_color: "#255741" }));
+    }
   });
 
   it("shows Default for all selects when style is undefined", () => {

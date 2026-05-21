@@ -33,6 +33,7 @@ export function sectionStyle(props: StyleProps): CSSProperties | undefined {
 
 type ItemStyleInput = {
   color?: string;
+  background_color?: string;
   size?: string;
   font?: string;
   weight?: string;
@@ -43,6 +44,7 @@ export function itemStyle(style: ItemStyleInput): CSSProperties | undefined {
   if (!style) return undefined;
   const css: CSSProperties = {};
   if (style.color) css.color = style.color;
+  if (style.background_color) css.backgroundColor = style.background_color;
   if (style.size && style.size !== "default") {
     const sizes: Record<string, string> = { small: "0.875rem", large: "1.2rem", display: "1.625rem" };
     if (sizes[style.size]) css.fontSize = sizes[style.size];

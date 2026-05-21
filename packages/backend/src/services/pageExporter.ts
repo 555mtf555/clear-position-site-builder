@@ -461,10 +461,11 @@ function contentSection(className: string, eyebrow: string | undefined, headline
 }
 
 /** Converts a TextStyle object to an inline style attribute string for exported HTML. */
-function itemStyleAttr(style?: { color?: string; size?: string; font?: string; weight?: string }): string {
+function itemStyleAttr(style?: { color?: string; background_color?: string; size?: string; font?: string; weight?: string }): string {
   if (!style) return "";
   const parts: string[] = [];
   if (style.color) parts.push(`color:${escapeAttr(style.color)}`);
+  if (style.background_color) parts.push(`background-color:${escapeAttr(style.background_color)}`);
   if (style.size && style.size !== "default") {
     const sizes: Record<string, string> = { small: "14px", large: "19px", display: "26px" };
     if (sizes[style.size]) parts.push(`font-size:${sizes[style.size]}`);

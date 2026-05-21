@@ -153,7 +153,7 @@ describe("Page schema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts a card with an optional TextStyle", () => {
+  it("accepts a card with an optional TextStyle including background_color", () => {
     const result = Section.safeParse({
       id: "sec_services",
       type: "services",
@@ -163,7 +163,7 @@ describe("Page schema", () => {
           {
             title: "Sprint",
             description: "A sprint.",
-            style: { color: "#255741", size: "large", font: "serif", weight: "bold" },
+            style: { color: "#255741", background_color: "#f0fff8", size: "large", font: "serif", weight: "bold" },
           },
         ],
       },
@@ -172,6 +172,7 @@ describe("Page schema", () => {
     expect(result.success).toBe(true);
     if (result.success && result.data.type === "services") {
       expect(result.data.props.services[0]?.style?.size).toBe("large");
+      expect(result.data.props.services[0]?.style?.background_color).toBe("#f0fff8");
     }
   });
 

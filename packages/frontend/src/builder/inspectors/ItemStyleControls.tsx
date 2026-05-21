@@ -77,6 +77,11 @@ export function ItemStyleControls({ style, onChange }: ItemStyleControlsProps) {
         value={s.color ?? "#111111"}
         onChange={(color) => update({ color: color === "#111111" ? undefined : color })}
       />
+      <ColorField
+        label="Background color"
+        value={s.background_color ?? "#ffffff"}
+        onChange={(background_color) => update({ background_color: background_color === "#ffffff" ? undefined : background_color })}
+      />
       <p className="section-variant-field__hint">Item style overrides section defaults for this card only.</p>
     </div>
   );
