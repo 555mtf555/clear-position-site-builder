@@ -3,6 +3,7 @@ import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
+import { TextFieldStyleControls } from "./TextFieldStyleControls";
 
 export function ServicesInspector({
   section,
@@ -53,6 +54,18 @@ export function ServicesInspector({
                 <ItemStyleControls
                   style={service.style}
                   onChange={(style) => updateService({ ...service, style })}
+                />
+                <p className="inspector-section__field-label">Title</p>
+                <TextFieldStyleControls
+                  fieldLabel="title"
+                  style={service.title_style}
+                  onChange={(title_style) => updateService({ ...service, title_style })}
+                />
+                <p className="inspector-section__field-label">Description</p>
+                <TextFieldStyleControls
+                  fieldLabel="description"
+                  style={service.description_style}
+                  onChange={(description_style) => updateService({ ...service, description_style })}
                 />
               </div>
             </details>

@@ -3,6 +3,7 @@ import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
+import { TextFieldStyleControls } from "./TextFieldStyleControls";
 
 export function ProblemInspector({
   section,
@@ -54,6 +55,18 @@ export function ProblemInspector({
                 <ItemStyleControls
                   style={problem.style}
                   onChange={(style) => updateProblem({ ...problem, style })}
+                />
+                <p className="inspector-section__field-label">Title</p>
+                <TextFieldStyleControls
+                  fieldLabel="title"
+                  style={problem.title_style}
+                  onChange={(title_style) => updateProblem({ ...problem, title_style })}
+                />
+                <p className="inspector-section__field-label">Description</p>
+                <TextFieldStyleControls
+                  fieldLabel="description"
+                  style={problem.description_style}
+                  onChange={(description_style) => updateProblem({ ...problem, description_style })}
                 />
               </div>
             </details>

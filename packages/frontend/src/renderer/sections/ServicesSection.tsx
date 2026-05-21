@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ServicesSection as ServicesSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
+import { sectionStyle, typographyClasses, cardSurface, textFieldStyle } from "../sectionStyle";
 import { EditableText } from "../InlineEdit";
 
 export function ServicesSection({ section }: { section: ServicesSectionType }) {
@@ -14,11 +14,11 @@ export function ServicesSection({ section }: { section: ServicesSectionType }) {
         <h2>{props.headline}</h2>
         <div className="card-grid">
           {props.services.map((service, idx) => (
-            <article className="section-card" key={idx} style={itemStyle(service.style)}>
-              <EditableText tag="h3" path={{ sectionId: section.id, field: "title", arrayField: "services", itemIndex: idx, required: true }}>
+            <article className="section-card" key={idx} style={cardSurface(service.style)}>
+              <EditableText tag="h3" style={textFieldStyle(service.title_style, service.style)} path={{ sectionId: section.id, field: "title", arrayField: "services", itemIndex: idx, required: true }}>
                 {service.title}
               </EditableText>
-              <EditableText tag="p" path={{ sectionId: section.id, field: "description", arrayField: "services", itemIndex: idx, multiline: true }}>
+              <EditableText tag="p" style={textFieldStyle(service.description_style, service.style)} path={{ sectionId: section.id, field: "description", arrayField: "services", itemIndex: idx, multiline: true }}>
                 {service.description}
               </EditableText>
             </article>

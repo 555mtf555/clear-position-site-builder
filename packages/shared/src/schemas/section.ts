@@ -79,11 +79,16 @@ export const TextStyle = z.object({
 });
 export type TextStyle = z.infer<typeof TextStyle>;
 
-// Card with optional per-item text style
+// Card with optional surface style and per-field text styles
 const Card = z.object({
   title: z.string().min(1, "Title is required."),
   description: z.string().min(1, "Description is required."),
+  /** Legacy/surface style — background_color is the card surface; text props are fallback only. */
   style: TextStyle.optional(),
+  /** Title-specific text style (color, size, font, weight). */
+  title_style: TextStyle.optional(),
+  /** Description-specific text style. */
+  description_style: TextStyle.optional(),
 });
 
 const HeroProps = z
@@ -144,10 +149,14 @@ export const ProofSectionSchema = SectionBase.extend({
     headline: z.string().min(1, "Headline is required."),
     quote: OptionalText,
     attribution: OptionalText,
+    quote_style: TextStyle.optional(),
+    attribution_style: TextStyle.optional(),
     metrics: z.array(z.object({
       value: z.string().min(1, "Metric value is required."),
       label: z.string().min(1, "Metric label is required."),
       style: TextStyle.optional(),
+      value_style: TextStyle.optional(),
+      label_style: TextStyle.optional(),
     })).default([]),
   }),
 });
@@ -172,6 +181,8 @@ export const FaqSectionSchema = SectionBase.extend({
       question: z.string().min(1, "Question is required."),
       answer: z.string().min(1, "Answer is required."),
       style: TextStyle.optional(),
+      question_style: TextStyle.optional(),
+      answer_style: TextStyle.optional(),
     })).min(1, "Add at least one FAQ item."),
   }),
 });

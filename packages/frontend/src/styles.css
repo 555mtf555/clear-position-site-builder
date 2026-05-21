@@ -3515,3 +3515,6 @@ details[open] .panel-summary-row > span:first-child::before {
   /* Match common heading/text widths */
   max-width: 100%;
 }
+
+.inspector-section__field-label{margin:10px 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--cp-ink-muted,#5a6d62)}
+.text-field-style-controls{display:grid;gap:10px}

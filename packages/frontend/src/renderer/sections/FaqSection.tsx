@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { FaqSection as FaqSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
+import { sectionStyle, typographyClasses, cardSurface, textFieldStyle } from "../sectionStyle";
 import { EditableText } from "../InlineEdit";
 
 export function FaqSection({ section }: { section: FaqSectionType }) {
@@ -14,11 +14,11 @@ export function FaqSection({ section }: { section: FaqSectionType }) {
         <h2>{props.headline}</h2>
         <div className="faq-list">
           {props.items.map((item, idx) => (
-            <article key={idx} style={itemStyle(item.style)}>
-              <EditableText tag="h3" path={{ sectionId: section.id, field: "question", arrayField: "items", itemIndex: idx, required: true }}>
+            <article key={idx} style={cardSurface(item.style)}>
+              <EditableText tag="h3" style={textFieldStyle(item.question_style, item.style)} path={{ sectionId: section.id, field: "question", arrayField: "items", itemIndex: idx, required: true }}>
                 {item.question}
               </EditableText>
-              <EditableText tag="p" path={{ sectionId: section.id, field: "answer", arrayField: "items", itemIndex: idx, multiline: true }}>
+              <EditableText tag="p" style={textFieldStyle(item.answer_style, item.style)} path={{ sectionId: section.id, field: "answer", arrayField: "items", itemIndex: idx, multiline: true }}>
                 {item.answer}
               </EditableText>
             </article>

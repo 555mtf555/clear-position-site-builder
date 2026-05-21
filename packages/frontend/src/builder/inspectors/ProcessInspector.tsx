@@ -3,6 +3,7 @@ import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
+import { TextFieldStyleControls } from "./TextFieldStyleControls";
 
 export function ProcessInspector({
   section,
@@ -53,6 +54,18 @@ export function ProcessInspector({
                 <ItemStyleControls
                   style={step.style}
                   onChange={(style) => updateStep({ ...step, style })}
+                />
+                <p className="inspector-section__field-label">Title</p>
+                <TextFieldStyleControls
+                  fieldLabel="title"
+                  style={step.title_style}
+                  onChange={(title_style) => updateStep({ ...step, title_style })}
+                />
+                <p className="inspector-section__field-label">Description</p>
+                <TextFieldStyleControls
+                  fieldLabel="description"
+                  style={step.description_style}
+                  onChange={(description_style) => updateStep({ ...step, description_style })}
                 />
               </div>
             </details>

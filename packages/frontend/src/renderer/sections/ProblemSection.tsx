@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ProblemSection as ProblemSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
+import { sectionStyle, typographyClasses, cardSurface, textFieldStyle } from "../sectionStyle";
 import { EditableText } from "../InlineEdit";
 
 export function ProblemSection({ section }: { section: ProblemSectionType }) {
@@ -15,11 +15,11 @@ export function ProblemSection({ section }: { section: ProblemSectionType }) {
         {props.intro ? <p className="content-section__intro">{props.intro}</p> : null}
         <div className="card-grid">
           {props.problems.map((problem, idx) => (
-            <article className="section-card" key={idx} style={itemStyle(problem.style)}>
-              <EditableText tag="h3" path={{ sectionId: section.id, field: "title", arrayField: "problems", itemIndex: idx, required: true }}>
+            <article className="section-card" key={idx} style={cardSurface(problem.style)}>
+              <EditableText tag="h3" style={textFieldStyle(problem.title_style, problem.style)} path={{ sectionId: section.id, field: "title", arrayField: "problems", itemIndex: idx, required: true }}>
                 {problem.title}
               </EditableText>
-              <EditableText tag="p" path={{ sectionId: section.id, field: "description", arrayField: "problems", itemIndex: idx, multiline: true }}>
+              <EditableText tag="p" style={textFieldStyle(problem.description_style, problem.style)} path={{ sectionId: section.id, field: "description", arrayField: "problems", itemIndex: idx, multiline: true }}>
                 {problem.description}
               </EditableText>
             </article>

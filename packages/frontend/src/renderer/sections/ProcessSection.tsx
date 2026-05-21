@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ProcessSection as ProcessSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
+import { sectionStyle, typographyClasses, cardSurface, textFieldStyle } from "../sectionStyle";
 import { EditableText } from "../InlineEdit";
 
 export function ProcessSection({ section }: { section: ProcessSectionType }) {
@@ -14,12 +14,12 @@ export function ProcessSection({ section }: { section: ProcessSectionType }) {
         <h2>{props.headline}</h2>
         <div className="step-list">
           {props.steps.map((step, index) => (
-            <article className="step-card" key={index} style={itemStyle(step.style)}>
+            <article className="step-card" key={index} style={cardSurface(step.style)}>
               <span>{index + 1}</span>
-              <EditableText tag="h3" path={{ sectionId: section.id, field: "title", arrayField: "steps", itemIndex: index, required: true }}>
+              <EditableText tag="h3" style={textFieldStyle(step.title_style, step.style)} path={{ sectionId: section.id, field: "title", arrayField: "steps", itemIndex: index, required: true }}>
                 {step.title}
               </EditableText>
-              <EditableText tag="p" path={{ sectionId: section.id, field: "description", arrayField: "steps", itemIndex: index, multiline: true }}>
+              <EditableText tag="p" style={textFieldStyle(step.description_style, step.style)} path={{ sectionId: section.id, field: "description", arrayField: "steps", itemIndex: index, multiline: true }}>
                 {step.description}
               </EditableText>
             </article>

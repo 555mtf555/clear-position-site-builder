@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ProofSection as ProofSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
+import { sectionStyle, typographyClasses, cardSurface, textFieldStyle } from "../sectionStyle";
 import { EditableText } from "../InlineEdit";
 
 export function ProofSection({ section }: { section: ProofSectionType }) {
@@ -15,13 +15,13 @@ export function ProofSection({ section }: { section: ProofSectionType }) {
         {props.quote ? (
           <figure className="quote-block">
             <blockquote>
-              <EditableText tag="span" path={{ sectionId: section.id, field: "quote", multiline: true }}>
+              <EditableText tag="span" style={textFieldStyle(props.quote_style)} path={{ sectionId: section.id, field: "quote", multiline: true }}>
                 {props.quote}
               </EditableText>
             </blockquote>
             {props.attribution ? (
               <figcaption>
-                <EditableText tag="span" path={{ sectionId: section.id, field: "attribution" }}>
+                <EditableText tag="span" style={textFieldStyle(props.attribution_style)} path={{ sectionId: section.id, field: "attribution" }}>
                   {props.attribution}
                 </EditableText>
               </figcaption>
@@ -31,11 +31,11 @@ export function ProofSection({ section }: { section: ProofSectionType }) {
         {props.metrics.length > 0 ? (
           <div className="metric-grid">
             {props.metrics.map((metric, idx) => (
-              <div className="metric" key={idx} style={itemStyle(metric.style)}>
-                <EditableText tag="strong" path={{ sectionId: section.id, field: "value", arrayField: "metrics", itemIndex: idx, required: true }}>
+              <div className="metric" key={idx} style={cardSurface(metric.style)}>
+                <EditableText tag="strong" style={textFieldStyle(metric.value_style, metric.style)} path={{ sectionId: section.id, field: "value", arrayField: "metrics", itemIndex: idx, required: true }}>
                   {metric.value}
                 </EditableText>
-                <EditableText tag="span" path={{ sectionId: section.id, field: "label", arrayField: "metrics", itemIndex: idx, required: true }}>
+                <EditableText tag="span" style={textFieldStyle(metric.label_style, metric.style)} path={{ sectionId: section.id, field: "label", arrayField: "metrics", itemIndex: idx, required: true }}>
                   {metric.label}
                 </EditableText>
               </div>

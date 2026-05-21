@@ -3,6 +3,7 @@ import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
+import { TextFieldStyleControls } from "./TextFieldStyleControls";
 
 export function FaqInspector({
   section,
@@ -53,6 +54,18 @@ export function FaqInspector({
                 <ItemStyleControls
                   style={item.style}
                   onChange={(style) => updateItem({ ...item, style })}
+                />
+                <p className="inspector-section__field-label">Question</p>
+                <TextFieldStyleControls
+                  fieldLabel="question"
+                  style={item.question_style}
+                  onChange={(question_style) => updateItem({ ...item, question_style })}
+                />
+                <p className="inspector-section__field-label">Answer</p>
+                <TextFieldStyleControls
+                  fieldLabel="answer"
+                  style={item.answer_style}
+                  onChange={(answer_style) => updateItem({ ...item, answer_style })}
                 />
               </div>
             </details>

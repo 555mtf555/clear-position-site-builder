@@ -1,70 +1,86 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ItemStyleControls } from "../ItemStyleControls";
+import { TextFieldStyleControls } from "../TextFieldStyleControls";
 
-describe("ItemStyleControls", () => {
-  it("renders Text size, Typeface, Weight, text color, and background color controls", () => {
+describe("ItemStyleControls — card surface (background only)", () => {
+  it("renders only the Card background color control", () => {
     render(<ItemStyleControls style={undefined} onChange={vi.fn()} />);
-    expect(screen.getByLabelText("Item text size")).toBeInTheDocument();
-    expect(screen.getByLabelText("Item typeface")).toBeInTheDocument();
-    expect(screen.getByLabelText("Item weight")).toBeInTheDocument();
-    expect(screen.getByLabelText("Text color")).toBeInTheDocument();
-    expect(screen.getByLabelText("Background color")).toBeInTheDocument();
+    expect(screen.getByLabelText("Card background")).toBeInTheDocument();
+    // Text style controls are no longer in ItemStyleControls
+    expect(screen.queryByLabelText("Item text size")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Item typeface")).not.toBeInTheDocument();
   });
 
   it("calls onChange with background_color when it changes", () => {
     const onChange = vi.fn();
-    render(<ItemStyleControls style={undefined} onChange={onChange} />);
     const { container } = render(<ItemStyleControls style={undefined} onChange={onChange} />);
-    const bgInput = container.querySelector('input[aria-label="Background color"]') as HTMLInputElement;
+    const bgInput = container.querySelector('input[aria-label="Card background"]') as HTMLInputElement;
     if (bgInput) {
       fireEvent.change(bgInput, { target: { value: "#255741" } });
       expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ background_color: "#255741" }));
     }
   });
 
-  it("shows Default for all selects when style is undefined", () => {
+  it("shows the card surface hint text", () => {
     render(<ItemStyleControls style={undefined} onChange={vi.fn()} />);
-    expect(screen.getByLabelText("Item text size")).toHaveValue("default");
-    expect(screen.getByLabelText("Item typeface")).toHaveValue("brand");
-    expect(screen.getByLabelText("Item weight")).toHaveValue("default");
+    expect(screen.getByText(/card surface/i)).toBeInTheDocument();
+  });
+});
+
+describe("TextFieldStyleControls — per-field text styling", () => {
+  it("renders Text size, Typeface, Weight, and Color controls", () => {
+    render(<TextFieldStyleControls style={undefined} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("field text size")).toBeInTheDocument();
+    expect(screen.getByLabelText("field typeface")).toBeInTheDocument();
+    expect(screen.getByLabelText("field weight")).toBeInTheDocument();
+    expect(screen.getByLabelText("Color")).toBeInTheDocument();
+  });
+
+  it("uses the fieldLabel prop for aria-labels", () => {
+    render(<TextFieldStyleControls fieldLabel="title" style={undefined} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("title text size")).toBeInTheDocument();
+    expect(screen.getByLabelText("title typeface")).toBeInTheDocument();
+  });
+
+  it("shows Default when style is undefined", () => {
+    render(<TextFieldStyleControls style={undefined} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("field text size")).toHaveValue("default");
+    expect(screen.getByLabelText("field typeface")).toHaveValue("brand");
+    expect(screen.getByLabelText("field weight")).toHaveValue("default");
   });
 
   it("reflects the current style in the selects", () => {
     render(
-      <ItemStyleControls
+      <TextFieldStyleControls
+        fieldLabel="title"
         style={{ size: "large", font: "serif", weight: "bold" }}
         onChange={vi.fn()}
       />,
     );
-    expect(screen.getByLabelText("Item text size")).toHaveValue("large");
-    expect(screen.getByLabelText("Item typeface")).toHaveValue("serif");
-    expect(screen.getByLabelText("Item weight")).toHaveValue("bold");
+    expect(screen.getByLabelText("title text size")).toHaveValue("large");
+    expect(screen.getByLabelText("title typeface")).toHaveValue("serif");
+    expect(screen.getByLabelText("title weight")).toHaveValue("bold");
   });
 
-  it("calls onChange with updated style when Text size is changed", () => {
+  it("calls onChange when Text size is changed", () => {
     const onChange = vi.fn();
-    render(<ItemStyleControls style={undefined} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText("Item text size"), { target: { value: "display" } });
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ size: "display" }));
+    render(<TextFieldStyleControls fieldLabel="desc" style={undefined} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("desc text size"), { target: { value: "large" } });
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ size: "large" }));
   });
 
-  it("calls onChange with updated style when Typeface is changed", () => {
+  it("calls onChange when Typeface is changed to serif", () => {
     const onChange = vi.fn();
-    render(<ItemStyleControls style={undefined} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText("Item typeface"), { target: { value: "serif" } });
+    render(<TextFieldStyleControls fieldLabel="q" style={undefined} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("q typeface"), { target: { value: "serif" } });
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ font: "serif" }));
   });
 
-  it("calls onChange with undefined font when Brand default is selected", () => {
+  it("sets font to undefined when Brand default is selected", () => {
     const onChange = vi.fn();
-    render(<ItemStyleControls style={{ font: "serif" }} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText("Item typeface"), { target: { value: "brand" } });
+    render(<TextFieldStyleControls fieldLabel="q" style={{ font: "serif" }} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("q typeface"), { target: { value: "brand" } });
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ font: undefined }));
-  });
-
-  it("shows the helper hint about overriding section defaults", () => {
-    render(<ItemStyleControls style={undefined} onChange={vi.fn()} />);
-    expect(screen.getByText(/Item style overrides section defaults/)).toBeInTheDocument();
   });
 });

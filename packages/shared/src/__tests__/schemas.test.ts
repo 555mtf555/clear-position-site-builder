@@ -153,6 +153,70 @@ describe("Page schema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("accepts a card with field-level title_style and description_style", () => {
+    const result = Section.safeParse({
+      id: "sec_services",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          {
+            title: "Sprint",
+            description: "A sprint.",
+            style: { background_color: "#f0fff8" },
+            title_style: { size: "large", color: "#255741" },
+            description_style: { weight: "medium" },
+          },
+        ],
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "services") {
+      const svc = result.data.props.services[0]!;
+      expect(svc.style?.background_color).toBe("#f0fff8");
+      expect(svc.title_style?.size).toBe("large");
+      expect(svc.description_style?.weight).toBe("medium");
+    }
+  });
+
+  it("accepts FAQ items with question_style and answer_style", () => {
+    const result = Section.safeParse({
+      id: "sec_faq",
+      type: "faq",
+      props: {
+        headline: "FAQ",
+        items: [{ question: "How?", answer: "Like this.", question_style: { font: "serif" }, answer_style: { size: "small" } }],
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "faq") {
+      const item = result.data.props.items[0]!;
+      expect(item.question_style?.font).toBe("serif");
+      expect(item.answer_style?.size).toBe("small");
+    }
+  });
+
+  it("accepts Proof metrics with value_style and label_style", () => {
+    const result = Section.safeParse({
+      id: "sec_proof",
+      type: "proof",
+      props: {
+        headline: "Proof",
+        metrics: [{ value: "2x", label: "faster", value_style: { weight: "bold" }, label_style: { color: "#255741" } }],
+        quote_style: { font: "serif" },
+        attribution_style: { size: "small" },
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "proof") {
+      expect(result.data.props.metrics[0]?.value_style?.weight).toBe("bold");
+      expect(result.data.props.quote_style?.font).toBe("serif");
+    }
+  });
+
   it("accepts a card with an optional TextStyle including background_color", () => {
     const result = Section.safeParse({
       id: "sec_services",

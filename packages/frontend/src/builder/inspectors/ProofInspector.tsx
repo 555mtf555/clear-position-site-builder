@@ -3,6 +3,7 @@ import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
+import { TextFieldStyleControls } from "./TextFieldStyleControls";
 
 export function ProofInspector({
   section,
@@ -54,6 +55,18 @@ export function ProofInspector({
                 <ItemStyleControls
                   style={metric.style}
                   onChange={(style) => updateMetric({ ...metric, style })}
+                />
+                <p className="inspector-section__field-label">Value</p>
+                <TextFieldStyleControls
+                  fieldLabel="value"
+                  style={metric.value_style}
+                  onChange={(value_style) => updateMetric({ ...metric, value_style })}
+                />
+                <p className="inspector-section__field-label">Label</p>
+                <TextFieldStyleControls
+                  fieldLabel="label"
+                  style={metric.label_style}
+                  onChange={(label_style) => updateMetric({ ...metric, label_style })}
                 />
               </div>
             </details>

@@ -39,6 +39,44 @@ type ItemStyleInput = {
   weight?: string;
 } | undefined;
 
+/**
+ * Extracts only background_color from a style object — for the card/article container.
+ * Text properties (color, size, font, weight) belong on individual text elements.
+ */
+export function cardSurface(style: ItemStyleInput): CSSProperties | undefined {
+  if (!style?.background_color) return undefined;
+  return { backgroundColor: style.background_color };
+}
+
+/**
+ * Converts text-only style properties to React CSSProperties for a text element
+ * (h3, p, span, etc.). Does NOT apply background_color — that goes on the container.
+ *
+ * @param fieldStyle  Field-specific style (title_style, description_style, etc.).
+ * @param legacyFallback  Legacy card-level style, used as fallback for existing content.
+ */
+export function textFieldStyle(
+  fieldStyle: ItemStyleInput,
+  legacyFallback?: ItemStyleInput,
+): CSSProperties | undefined {
+  const s = fieldStyle ?? legacyFallback;
+  if (!s) return undefined;
+  const css: CSSProperties = {};
+  if (s.color) css.color = s.color;
+  if (s.size && s.size !== "default") {
+    const sizes: Record<string, string> = { small: "0.875rem", large: "1.2rem", display: "1.625rem" };
+    if (sizes[s.size]) css.fontSize = sizes[s.size];
+  }
+  if (s.font && s.font !== "brand") {
+    css.fontFamily = fontFamilyValue(s.font);
+  }
+  if (s.weight && s.weight !== "default") {
+    const weights: Record<string, number> = { medium: 500, bold: 700 };
+    if (weights[s.weight]) css.fontWeight = weights[s.weight];
+  }
+  return Object.keys(css).length > 0 ? css : undefined;
+}
+
 /** Converts a TextStyle object to React inline CSS properties for a card/item. */
 export function itemStyle(style: ItemStyleInput): CSSProperties | undefined {
   if (!style) return undefined;

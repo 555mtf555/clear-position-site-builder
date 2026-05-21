@@ -32,7 +32,10 @@
       "Bash(sed -i 's|import { sectionStyle, typographyClasses, itemStyle } from \"../sectionStyle\";|import { sectionStyle, typographyClasses, itemStyle } from \"../sectionStyle\";\\\\nimport { EditableText } from \"../InlineEdit\";|' ProcessSection.tsx ProofSection.tsx)",
       "Bash(sed -i 's|import { sectionStyle, typographyClasses } from \"../sectionStyle\";|import { sectionStyle, typographyClasses } from \"../sectionStyle\";\\\\nimport { EditableText } from \"../InlineEdit\";|' SolutionSection.tsx)",
       "Bash(python3 fix_proof.py)",
-      "Bash(python3 fix_solution.py)"
+      "Bash(python3 fix_solution.py)",
+      "Bash(python3 patch_renderers.py)",
+      "Bash(python3 patch_faq_proof.py)",
+      "Bash(python3 patch_inspectors.py)"
     ]
   }
 }

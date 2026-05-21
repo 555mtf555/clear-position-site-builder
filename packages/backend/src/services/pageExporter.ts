@@ -318,18 +318,18 @@ async function renderSection(section: Section, context: ExportContext, options: 
       ], undefined, sectionStyle(section.props));
     case "process":
       return contentSection(`content-section${variantClass(section.variant)}${typographyClass(section.props)}`, section.props.eyebrow, section.props.headline, [
-        `<div class="step-list">${section.props.steps.map((step, i) => `<article class="step-card"${itemStyleAttr(step.style)}><span>${i + 1}</span><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.description)}</p></article>`).join("")}</div>`,
+        `<div class="step-list">${section.props.steps.map((step, i) => `<article class="step-card"${cardSurfaceAttr(step.style)}><span>${i + 1}</span><h3${textFieldStyleAttr(step.title_style, step.style)}>${escapeHtml(step.title)}</h3><p${textFieldStyleAttr(step.description_style, step.style)}>${escapeHtml(step.description)}</p></article>`).join("")}</div>`,
       ], undefined, sectionStyle(section.props));
     case "proof":
       return contentSection(`content-section content-section--proof${variantClass(section.variant)}${typographyClass(section.props)}`, section.props.eyebrow, section.props.headline, [
         section.props.quote ? `<figure class="quote-block"><blockquote>${escapeHtml(section.props.quote)}</blockquote>${section.props.attribution ? `<figcaption>${escapeHtml(section.props.attribution)}</figcaption>` : ""}</figure>` : "",
-        section.props.metrics.length ? `<div class="metric-grid">${section.props.metrics.map((m) => `<div class="metric"${itemStyleAttr(m.style)}><strong>${escapeHtml(m.value)}</strong><span>${escapeHtml(m.label)}</span></div>`).join("")}</div>` : "",
+        section.props.metrics.length ? `<div class="metric-grid">${section.props.metrics.map((m) => `<div class="metric"${cardSurfaceAttr(m.style)}><strong${textFieldStyleAttr(m.value_style, m.style)}>${escapeHtml(m.value)}</strong><span${textFieldStyleAttr(m.label_style, m.style)}>${escapeHtml(m.label)}</span></div>`).join("")}</div>` : "",
       ], undefined, sectionStyle(section.props));
     case "services":
       return contentSection(`content-section${variantClass(section.variant)}${typographyClass(section.props)}`, section.props.eyebrow, section.props.headline, [cardGrid(section.props.services)], undefined, sectionStyle(section.props));
     case "faq":
       return contentSection(`content-section content-section--faq${variantClass(section.variant)}${typographyClass(section.props)}`, section.props.eyebrow, section.props.headline, [
-        `<div class="faq-list">${section.props.items.map((item) => `<article${itemStyleAttr(item.style)}><h3>${escapeHtml(item.question)}</h3><p>${escapeHtml(item.answer)}</p></article>`).join("")}</div>`,
+        `<div class="faq-list">${section.props.items.map((item) => `<article${cardSurfaceAttr(item.style)}><h3${textFieldStyleAttr(item.question_style, item.style)}>${escapeHtml(item.question)}</h3><p${textFieldStyleAttr(item.answer_style, item.style)}>${escapeHtml(item.answer)}</p></article>`).join("")}</div>`,
       ], "content-section__inner content-section__inner--narrow", sectionStyle(section.props));
     case "final_cta":
       return renderHeroLike("final-cta-section", section.props, section.variant, context, options, "h2");
@@ -460,8 +460,44 @@ function contentSection(className: string, eyebrow: string | undefined, headline
   </section>`;
 }
 
-/** Converts a TextStyle object to an inline style attribute string for exported HTML. */
-function itemStyleAttr(style?: { color?: string; background_color?: string; size?: string; font?: string; weight?: string }): string {
+type StyleLike = { color?: string; background_color?: string; size?: string; font?: string; weight?: string } | undefined;
+
+/** Emits only background-color — for the card/article container. */
+function cardSurfaceAttr(style?: StyleLike): string {
+  if (!style?.background_color) return "";
+  return ` style="background-color:${escapeAttr(style.background_color)}"`;
+}
+
+/**
+ * Emits text-only style properties (no background-color) for a text element.
+ * Uses fieldStyle first; falls back to legacyStyle for backward compat.
+ */
+function textFieldStyleAttr(fieldStyle?: StyleLike, legacyFallback?: StyleLike): string {
+  const s = fieldStyle ?? legacyFallback;
+  if (!s) return "";
+  const parts: string[] = [];
+  if (s.color) parts.push(`color:${escapeAttr(s.color)}`);
+  if (s.size && s.size !== "default") {
+    const sizes: Record<string, string> = { small: "14px", large: "19px", display: "26px" };
+    if (sizes[s.size]) parts.push(`font-size:${sizes[s.size]}`);
+  }
+  if (s.font && s.font !== "brand") {
+    const fonts: Record<string, string> = {
+      serif: "Georgia,'Times New Roman',serif",
+      sans: "'Helvetica Neue',Helvetica,Arial,sans-serif",
+      display: "Impact,Anton,'Bebas Neue',sans-serif",
+    };
+    if (fonts[s.font]) parts.push(`font-family:${fonts[s.font]}`);
+  }
+  if (s.weight && s.weight !== "default") {
+    const weights: Record<string, string> = { medium: "500", bold: "700" };
+    if (weights[s.weight]) parts.push(`font-weight:${weights[s.weight]}`);
+  }
+  return parts.length ? ` style="${parts.join(";")}"` : "";
+}
+
+/** @deprecated Use cardSurfaceAttr + textFieldStyleAttr for new code. */
+function itemStyleAttr(style?: StyleLike): string {
   if (!style) return "";
   const parts: string[] = [];
   if (style.color) parts.push(`color:${escapeAttr(style.color)}`);
@@ -485,8 +521,10 @@ function itemStyleAttr(style?: { color?: string; background_color?: string; size
   return parts.length ? ` style="${parts.join(";")}"` : "";
 }
 
-function cardGrid(cards: Array<{ title: string; description: string; style?: { color?: string; size?: string; font?: string; weight?: string } }>): string {
-  return `<div class="card-grid">${cards.map((card) => `<article class="section-card"${itemStyleAttr(card.style)}><h3>${escapeHtml(card.title)}</h3><p>${escapeHtml(card.description)}</p></article>`).join("")}</div>`;
+function cardGrid(cards: Array<{ title: string; description: string; style?: StyleLike; title_style?: StyleLike; description_style?: StyleLike }>): string {
+  return `<div class="card-grid">${cards.map((card) =>
+    `<article class="section-card"${cardSurfaceAttr(card.style)}><h3${textFieldStyleAttr(card.title_style, card.style)}>${escapeHtml(card.title)}</h3><p${textFieldStyleAttr(card.description_style, card.style)}>${escapeHtml(card.description)}</p></article>`
+  ).join("")}</div>`;
 }
 
 function relativeExportPath(exportDir: string, filePath: string): string {
