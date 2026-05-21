@@ -178,7 +178,17 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
                 const { path } = inlineEditState;
                 setInlineEditState(null);
                 if (path.arrayField !== undefined && path.itemIndex !== undefined) {
-                  editor.updateSectionItemInArray(path.sectionId, path.arrayField, path.itemIndex, { [path.field]: value });
+                  if (path.isStringArrayItem) {
+                    // Plain string[] — replace the item at itemIndex with the new value.
+                    const section = editor.draftPage?.doc.sections.find((s) => s.id === path.sectionId);
+                    const arr = (section?.props as Record<string, unknown>)?.[path.arrayField] as unknown[];
+                    if (Array.isArray(arr)) {
+                      const newArr = arr.map((item, i) => i === path.itemIndex ? value : item);
+                      editor.updateSectionPropById(path.sectionId, { [path.arrayField]: newArr });
+                    }
+                  } else {
+                    editor.updateSectionItemInArray(path.sectionId, path.arrayField, path.itemIndex, { [path.field]: value });
+                  }
                 } else {
                   editor.updateSectionPropById(path.sectionId, { [path.field]: value });
                 }

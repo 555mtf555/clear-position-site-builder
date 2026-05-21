@@ -412,6 +412,148 @@ describe("PageRenderer inline editing", () => {
   });
 });
 
+describe("PageRenderer inline editing — Phase 21.5 coverage", () => {
+  const editorCtx = (onStartInlineEdit = vi.fn()) => ({
+    selectedSectionId: null,
+    onSelectSection: vi.fn(),
+    onStartInlineEdit,
+    onCommitInlineEdit: vi.fn(),
+    onCancelInlineEdit: vi.fn(),
+  });
+
+  const processPage: typeof page = {
+    ...page,
+    doc: {
+      ...page.doc,
+      sections: [{
+        id: "proc_1",
+        type: "process",
+        props: {
+          headline: "Our process",
+          steps: [
+            { title: "Discover", description: "Map the problem." },
+            { title: "Build", description: "Construct the solution." },
+          ],
+        },
+        elements: [],
+      }],
+    },
+  };
+
+  const proofPage: typeof page = {
+    ...page,
+    doc: {
+      ...page.doc,
+      sections: [{
+        id: "proof_1",
+        type: "proof",
+        props: {
+          headline: "Proof",
+          quote: "It worked perfectly.",
+          attribution: "Jane Doe",
+          metrics: [{ value: "2x", label: "growth" }],
+        },
+        elements: [],
+      }],
+    },
+  };
+
+  const solutionPage: typeof page = {
+    ...page,
+    doc: {
+      ...page.doc,
+      sections: [{
+        id: "sol_1",
+        type: "solution",
+        props: {
+          headline: "The solution",
+          body: "A focused approach.",
+          bullets: ["Fast", "Reliable"],
+        },
+        elements: [],
+      }],
+    },
+  };
+
+  it("process step title has inline-editable class in editor mode", () => {
+    const { container } = render(<PageRenderer page={processPage} editorContext={editorCtx()} />);
+    const h3s = container.querySelectorAll("h3.inline-editable");
+    expect(h3s.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("clicking process step title calls onStartInlineEdit with array path", () => {
+    const spy = vi.fn();
+    const { container } = render(<PageRenderer page={processPage} editorContext={editorCtx(spy)} />);
+    const h3 = container.querySelector("h3.inline-editable") as HTMLElement;
+    fireEvent.click(h3);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ sectionId: "proc_1", field: "title", arrayField: "steps", itemIndex: 0 }),
+      "Discover",
+    );
+  });
+
+  it("process step description renders as inline-editable multiline", () => {
+    const { container } = render(<PageRenderer page={processPage} editorContext={editorCtx()} />);
+    const paras = container.querySelectorAll("p.inline-editable");
+    expect(paras.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("proof metric value has inline-editable class", () => {
+    const { container } = render(<PageRenderer page={proofPage} editorContext={editorCtx()} />);
+    const strong = container.querySelector("strong.inline-editable");
+    expect(strong).not.toBeNull();
+    expect(strong?.textContent).toBe("2x");
+  });
+
+  it("clicking proof metric value calls onStartInlineEdit", () => {
+    const spy = vi.fn();
+    const { container } = render(<PageRenderer page={proofPage} editorContext={editorCtx(spy)} />);
+    const strong = container.querySelector("strong.inline-editable") as HTMLElement;
+    fireEvent.click(strong);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ sectionId: "proof_1", field: "value", arrayField: "metrics", itemIndex: 0 }),
+      "2x",
+    );
+  });
+
+  it("proof quote and attribution are editable in editor mode", () => {
+    const { container } = render(<PageRenderer page={proofPage} editorContext={editorCtx()} />);
+    const spans = container.querySelectorAll("span.inline-editable, blockquote span.inline-editable");
+    expect(spans.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("solution headline is inline-editable", () => {
+    const { container } = render(<PageRenderer page={solutionPage} editorContext={editorCtx()} />);
+    const h2 = container.querySelector("h2.inline-editable");
+    expect(h2).not.toBeNull();
+    expect(h2?.textContent).toBe("The solution");
+  });
+
+  it("solution body is inline-editable multiline", () => {
+    const { container } = render(<PageRenderer page={solutionPage} editorContext={editorCtx()} />);
+    const p = container.querySelector("p.inline-editable");
+    expect(p).not.toBeNull();
+    expect(p?.textContent).toContain("A focused approach");
+  });
+
+  it("solution bullets are inline-editable (string array)", () => {
+    const spy = vi.fn();
+    const { container } = render(<PageRenderer page={solutionPage} editorContext={editorCtx(spy)} />);
+    const bulletSpan = container.querySelector("li span.inline-editable") as HTMLElement;
+    expect(bulletSpan).not.toBeNull();
+    fireEvent.click(bulletSpan);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ sectionId: "sol_1", arrayField: "bullets", itemIndex: 0, isStringArrayItem: true }),
+      "Fast",
+    );
+  });
+
+  it("no inline-editable classes in non-editor mode for new sections", () => {
+    const { container } = render(<PageRenderer page={processPage} />);
+    expect(container.querySelectorAll(".inline-editable")).toHaveLength(0);
+  });
+});
+
 describe("PageRenderer editor context", () => {
   it("does not add editor-selectable elements when editorContext is absent", () => {
     const { container } = render(<PageRenderer page={page} />);

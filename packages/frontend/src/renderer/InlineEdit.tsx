@@ -14,6 +14,12 @@ export interface InlineEditPath {
   required?: boolean;
   /** If true, render a textarea; Enter alone does not commit (use Ctrl+Enter). */
   multiline?: boolean;
+  /**
+   * Set to true when the arrayField contains a plain string[] rather than an
+   * object array. The commit handler replaces the item at itemIndex directly
+   * instead of spreading a patch object into it.
+   */
+  isStringArrayItem?: boolean;
 }
 
 export interface InlineEditState {
@@ -121,7 +127,7 @@ export function EditableText({
   href,
 }: {
   children: string;
-  tag: "h1" | "h2" | "h3" | "p" | "a" | "span";
+  tag: "h1" | "h2" | "h3" | "p" | "a" | "span" | "strong";
   className?: string;
   style?: CSSProperties;
   path: InlineEditPath;

@@ -28,7 +28,11 @@
       "Bash(sed -i 's|<div className=\"metric\" key={`${metric.value}-${metric.label}`}>|<div className=\"metric\" key={`${metric.value}-${metric.label}`} style={itemStyle\\(metric.style\\)}>|' ProofSection.tsx)",
       "Bash(node -e ' *)",
       "Bash(npm -w packages/frontend run typecheck)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(sed -i 's|import { sectionStyle, typographyClasses, itemStyle } from \"../sectionStyle\";|import { sectionStyle, typographyClasses, itemStyle } from \"../sectionStyle\";\\\\nimport { EditableText } from \"../InlineEdit\";|' ProcessSection.tsx ProofSection.tsx)",
+      "Bash(sed -i 's|import { sectionStyle, typographyClasses } from \"../sectionStyle\";|import { sectionStyle, typographyClasses } from \"../sectionStyle\";\\\\nimport { EditableText } from \"../InlineEdit\";|' SolutionSection.tsx)",
+      "Bash(python3 fix_proof.py)",
+      "Bash(python3 fix_solution.py)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import type { ProofSection as ProofSectionType } from "@clear-position/shared";
 import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
+import { EditableText } from "../InlineEdit";
 
 export function ProofSection({ section }: { section: ProofSectionType }) {
   const { props } = section;
@@ -13,16 +14,30 @@ export function ProofSection({ section }: { section: ProofSectionType }) {
         <h2>{props.headline}</h2>
         {props.quote ? (
           <figure className="quote-block">
-            <blockquote>{props.quote}</blockquote>
-            {props.attribution ? <figcaption>{props.attribution}</figcaption> : null}
+            <blockquote>
+              <EditableText tag="span" path={{ sectionId: section.id, field: "quote", multiline: true }}>
+                {props.quote}
+              </EditableText>
+            </blockquote>
+            {props.attribution ? (
+              <figcaption>
+                <EditableText tag="span" path={{ sectionId: section.id, field: "attribution" }}>
+                  {props.attribution}
+                </EditableText>
+              </figcaption>
+            ) : null}
           </figure>
         ) : null}
         {props.metrics.length > 0 ? (
           <div className="metric-grid">
-            {props.metrics.map((metric) => (
-              <div className="metric" key={`${metric.value}-${metric.label}`} style={itemStyle(metric.style)}>
-                <strong>{metric.value}</strong>
-                <span>{metric.label}</span>
+            {props.metrics.map((metric, idx) => (
+              <div className="metric" key={idx} style={itemStyle(metric.style)}>
+                <EditableText tag="strong" path={{ sectionId: section.id, field: "value", arrayField: "metrics", itemIndex: idx, required: true }}>
+                  {metric.value}
+                </EditableText>
+                <EditableText tag="span" path={{ sectionId: section.id, field: "label", arrayField: "metrics", itemIndex: idx, required: true }}>
+                  {metric.label}
+                </EditableText>
               </div>
             ))}
           </div>
