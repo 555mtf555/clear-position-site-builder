@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { FaqSection, ProcessSection, ServicesSection } from "@clear-position/shared";
+import { reorderItems } from "../fields";
 import { Page as PageSchema } from "@clear-position/shared";
 import { FaqInspector } from "../FaqInspector";
 import { ProcessInspector } from "../ProcessInspector";
@@ -273,5 +274,95 @@ describe("structured repeated item inspectors", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+});
+
+describe("reorderItems helper", () => {
+  it("moves an item from one index to another", () => {
+    const items = ["a", "b", "c"];
+    expect(reorderItems(items, 0, 2)).toEqual(["b", "c", "a"]);
+    expect(reorderItems(items, 2, 0)).toEqual(["c", "a", "b"]);
+    expect(reorderItems(items, 1, 0)).toEqual(["b", "a", "c"]);
+  });
+
+  it("returns the original array when from === to", () => {
+    const items = ["a", "b", "c"];
+    expect(reorderItems(items, 1, 1)).toEqual(["a", "b", "c"]);
+  });
+
+  it("preserves item identity (including style) after reorder", () => {
+    const cards = [
+      { title: "One", description: "First.", style: { color: "#ff0000" } },
+      { title: "Two", description: "Second." },
+      { title: "Three", description: "Third.", style: { background_color: "#00ff00" } },
+    ];
+    const reordered = reorderItems(cards, 0, 2);
+    expect(reordered[0]?.title).toBe("Two");
+    expect(reordered[1]?.title).toBe("Three");
+    expect(reordered[1]?.style?.background_color).toBe("#00ff00");
+    expect(reordered[2]?.title).toBe("One");
+    expect(reordered[2]?.style?.color).toBe("#ff0000");
+  });
+});
+
+describe("drag handle rendering", () => {
+  it("renders a drag handle button for each service card", () => {
+    const section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          { title: "One", description: "First service." },
+          { title: "Two", description: "Second service." },
+        ],
+      },
+      elements: [],
+    };
+
+    render(<ServicesInspector section={section} onChange={() => undefined} />);
+    const handles = screen.getAllByRole("button", { name: /drag to reorder/i });
+    expect(handles).toHaveLength(2);
+  });
+
+  it("drag handles are disabled when only one item exists", () => {
+    const section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Only", description: "The only service." }],
+      },
+      elements: [],
+    };
+
+    render(<ServicesInspector section={section} onChange={() => undefined} />);
+    const handle = screen.getByRole("button", { name: /drag to reorder/i });
+    expect(handle).toBeDisabled();
+  });
+
+  it("reorder via reorderItems produces valid JSON and preserves card style", () => {
+    let section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          { title: "Alpha", description: "First.", style: { color: "#123456" } },
+          { title: "Beta", description: "Second." },
+          { title: "Gamma", description: "Third." },
+        ],
+      },
+      elements: [],
+    };
+
+    // Simulate moving item 0 to position 2 (Alpha moves to end)
+    const reordered = reorderItems(section.props.services, 0, 2);
+    expect(reordered[0]?.title).toBe("Beta");
+    expect(reordered[2]?.title).toBe("Alpha");
+    expect(reordered[2]?.style?.color).toBe("#123456");
+
+    section = { ...section, props: { ...section.props, services: reordered } };
+    expect(validPageWith(section)).toBe(true);
   });
 });

@@ -3254,3 +3254,66 @@ details[open] .panel-summary-row > span:first-child::before {
 @media(max-width:540px){.dashboard__create-site,.workflow-guide,.site-card,.brand-kit-panel{border-radius:8px}}
 
 .item-style-controls{display:grid;gap:10px}
+
+/* Repeated-item drag handles */
+.repeated-list__sortable-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.repeated-list__drag-handle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 4px 10px;
+  border: 1px solid var(--cp-line, #c8d4c2);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: #f2f5f0;
+  color: var(--cp-ink-muted, #5a6d62);
+  cursor: grab;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  letter-spacing: 0.01em;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.repeated-list__drag-handle:hover:not(:disabled) {
+  background: #e8ede5;
+  color: var(--cp-green, #255741);
+  border-color: rgba(37, 87, 65, 0.3);
+}
+
+.repeated-list__drag-handle:active:not(:disabled) {
+  cursor: grabbing;
+  background: #dfe8db;
+}
+
+.repeated-list__drag-handle:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.repeated-list__sortable-wrap .repeated-list__item {
+  border-radius: 0 0 8px 8px;
+  border-top-color: var(--cp-line, #c8d4c2);
+}
+
+.repeated-list__sortable-wrap--dragging {
+  opacity: 0.55;
+  z-index: 20;
+  position: relative;
+}
+
+.repeated-list__sortable-wrap--dragging .repeated-list__item {
+  border-style: dashed;
+}
+
+.repeated-list__sortable-wrap--over .repeated-list__drag-handle {
+  border-color: var(--cp-green, #255741);
+  background: var(--cp-green-faint, #e5f0ea);
+  color: var(--cp-green, #255741);
+}

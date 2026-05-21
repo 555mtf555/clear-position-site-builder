@@ -1,4 +1,21 @@
-import type { ReactNode } from "react";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import clsx from "clsx";
+import { useState, type ReactNode } from "react";
 import type { ValidationIssue } from "../usePageEditor";
 
 export interface InspectorBaseProps<TProps> {
@@ -121,6 +138,16 @@ export function moveItem<T>(items: T[], index: number, direction: "up" | "down")
   return next;
 }
 
+/** Reorders an array by moving the item at `fromIndex` to `toIndex`. */
+export function reorderItems<T>(items: T[], fromIndex: number, toIndex: number): T[] {
+  if (fromIndex === toIndex) return items;
+  const next = [...items];
+  const [item] = next.splice(fromIndex, 1);
+  if (item === undefined) return items;
+  next.splice(toIndex, 0, item);
+  return next;
+}
+
 export function duplicateItem<T>(items: T[], index: number): T[] {
   const item = items[index];
   if (item === undefined) return items;
@@ -139,6 +166,53 @@ function isItemPopulated(item: unknown): boolean {
   }
   return false;
 }
+
+// ── Sortable wrapper for each repeated item ───────────────────────────────
+
+interface SortableItemRowProps {
+  id: string;
+  activeId: string | null;
+  disabled: boolean;
+  dragLabel: string;
+  children: ReactNode;
+}
+
+function SortableItemRow({ id, activeId, disabled, dragLabel, children }: SortableItemRowProps) {
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id, disabled });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={clsx("repeated-list__sortable-wrap", {
+        "repeated-list__sortable-wrap--dragging": isDragging,
+        "repeated-list__sortable-wrap--over": activeId && activeId !== id && !isDragging,
+      })}
+    >
+      <button
+        type="button"
+        className="repeated-list__drag-handle"
+        aria-label={dragLabel}
+        disabled={disabled}
+        {...attributes}
+        {...listeners}
+      >
+        <span aria-hidden="true">⠿</span>
+        Drag to reorder
+      </button>
+      {children}
+    </div>
+  );
+}
+
+// ── RepeatedFieldList with drag-and-drop reordering ───────────────────────
 
 export function RepeatedFieldList<T>({
   label,
@@ -163,6 +237,21 @@ export function RepeatedFieldList<T>({
   emptyMessage?: string;
 }) {
   const singular = itemLabel ?? (label.endsWith("s") ? label.slice(0, -1) : label);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  // Use string-index IDs (e.g. "0","1","2") — rebuilt on each render after reorder.
+  const itemIds = items.map((_, i) => String(i));
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    onChange(reorderItems(items, Number(active.id), Number(over.id)));
+  }
 
   function handleRemove(index: number) {
     const item = items[index];
@@ -186,28 +275,46 @@ export function RepeatedFieldList<T>({
           {emptyMessage ?? `No ${label.toLowerCase()} yet. Add one to get started.`}
         </p>
       ) : null}
-      <div className="repeated-list__items">
-        {items.map((item, index) => (
-          <fieldset className="repeated-list__item" key={index}>
-            <legend>{singular} {index + 1}</legend>
-            {renderItem(item, index, (nextItem) => onChange(replaceItem(items, index, nextItem)))}
-            <div className="repeated-list__actions">
-              <button type="button" disabled={index === 0} onClick={() => onChange(moveItem(items, index, "up"))}>
-                Move up
-              </button>
-              <button type="button" disabled={index === items.length - 1} onClick={() => onChange(moveItem(items, index, "down"))}>
-                Move down
-              </button>
-              <button type="button" onClick={() => onChange(duplicateItem(items, index))}>
-                Duplicate
-              </button>
-              <button type="button" disabled={items.length <= 1} onClick={() => handleRemove(index)}>
-                Remove
-              </button>
-            </div>
-          </fieldset>
-        ))}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={(e) => setActiveId(String(e.active.id))}
+        onDragCancel={() => setActiveId(null)}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          <div className="repeated-list__items">
+            {items.map((item, index) => (
+              <SortableItemRow
+                key={index}
+                id={String(index)}
+                activeId={activeId}
+                disabled={items.length <= 1}
+                dragLabel={`Drag to reorder ${singular.toLowerCase()}`}
+              >
+                <fieldset className="repeated-list__item">
+                  <legend>{singular} {index + 1}</legend>
+                  {renderItem(item, index, (nextItem) => onChange(replaceItem(items, index, nextItem)))}
+                  <div className="repeated-list__actions">
+                    <button type="button" disabled={index === 0} onClick={() => onChange(moveItem(items, index, "up"))}>
+                      Move up
+                    </button>
+                    <button type="button" disabled={index === items.length - 1} onClick={() => onChange(moveItem(items, index, "down"))}>
+                      Move down
+                    </button>
+                    <button type="button" onClick={() => onChange(duplicateItem(items, index))}>
+                      Duplicate
+                    </button>
+                    <button type="button" disabled={items.length <= 1} onClick={() => handleRemove(index)}>
+                      Remove
+                    </button>
+                  </div>
+                </fieldset>
+              </SortableItemRow>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
