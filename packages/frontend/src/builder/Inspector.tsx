@@ -1,4 +1,4 @@
-import { createImportQaChecklist, createImportQaStatus, type ImportQaChecklistItem, type Page, type Section, type SectionVariant } from "@clear-position/shared";
+import { createImportQaChecklist, type ImportQaChecklistItem, type Page, type Section, type SectionVariant } from "@clear-position/shared";
 import { HeroInspector } from "./inspectors/HeroInspector";
 import { FaqInspector } from "./inspectors/FaqInspector";
 import { FinalCtaInspector } from "./inspectors/FinalCtaInspector";
@@ -53,11 +53,10 @@ export function Inspector({
         <button type="button" className="button button--primary" disabled={!isDirty || saveStatus === "saving"} onClick={() => void onSave()}>
           {saveStatus === "saving" ? "Saving..." : "Save"}
         </button>
-        <button type="button" className="button" disabled={saveStatus === "saving"} onClick={() => void onReload()}>
-          Discard changes
+        <button type="button" className="button button--ghost" disabled={saveStatus === "saving"} onClick={() => void onReload()}>
+          Discard
         </button>
       </div>
-      <ReviewStatus page={page} isDirty={isDirty} />
       {saveMessage ? <p className="inspector-status inspector-status--success">{saveMessage}</p> : null}
       {error ? <p className="inspector-status inspector-status--error">{error}</p> : null}
       {validationIssues.length > 0 ? (
@@ -160,31 +159,6 @@ export function Inspector({
         />
       ) : null}
     </aside>
-  );
-}
-
-function ReviewStatus({ page, isDirty }: { page: Page; isDirty: boolean }) {
-  const qaStatus = createImportQaStatus(page.doc);
-  const unresolved = qaStatus.unresolvedRequiredCount + qaStatus.unresolvedWarningCount;
-
-  if (isDirty) {
-    return (
-      <p className="review-status review-status--warn" aria-label="Review status">
-        Unsaved changes — save before export
-      </p>
-    );
-  }
-  if (unresolved > 0) {
-    return (
-      <p className="review-status review-status--needs-review" aria-label="Review status">
-        Review status: {unresolved} QA item{unresolved === 1 ? "" : "s"} need review
-      </p>
-    );
-  }
-  return (
-    <p className="review-status review-status--ready" aria-label="Review status">
-      Review status: Ready
-    </p>
   );
 }
 

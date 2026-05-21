@@ -10,9 +10,13 @@ export function FieldHelp({ label, children }: FieldHelpProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const bubbleRef = useRef<HTMLSpanElement>(null);
 
-  // Repositions the bubble to stay within the viewport on hover/focus.
-  // Prefers right-aligned (extends left from button), falls back to left-aligned.
-  const reposition = useCallback(() => {
+  /**
+   * Positions the tooltip using `position: fixed` so it is never clipped by
+   * parent containers with overflow:hidden or by narrow parent bounds.
+   * Prefers right-aligned (tooltip extends left from button), falls back to
+   * left-aligned when there isn't enough room on the left.
+   */
+  const show = useCallback(() => {
     const button = buttonRef.current;
     const bubble = bubbleRef.current;
     if (!button || !bubble) return;
@@ -21,43 +25,40 @@ export function FieldHelp({ label, children }: FieldHelpProps) {
     const vw = document.documentElement.clientWidth;
     const maxW = Math.min(260, vw - 32);
 
+    bubble.style.position = "fixed";
+    bubble.style.top = `${btnRect.bottom + 7}px`;
     bubble.style.maxWidth = `${maxW}px`;
+    bubble.style.right = "";
 
-    const spaceLeft = btnRect.right - 8;        // room available to the left of button
-    const spaceRight = vw - btnRect.left - 8;   // room available to the right of button
-
-    if (spaceLeft >= maxW) {
-      // Right-aligned: tooltip extends leftward from the button edge.
-      bubble.style.right = "0";
-      bubble.style.left = "auto";
-    } else if (spaceRight >= maxW) {
-      // Left-aligned: tooltip extends rightward from the button edge.
-      bubble.style.left = "0";
-      bubble.style.right = "auto";
+    // Prefer: right-align tooltip so its right edge meets the button's right edge.
+    const rightAlignedLeft = btnRect.right - maxW;
+    if (rightAlignedLeft >= 8) {
+      bubble.style.left = `${rightAlignedLeft}px`;
     } else {
-      // Neither side has enough room; anchor to whichever side has more space.
-      if (spaceLeft >= spaceRight) {
-        bubble.style.right = "0";
-        bubble.style.left = "auto";
-        bubble.style.maxWidth = `${spaceLeft}px`;
-      } else {
-        bubble.style.left = "0";
-        bubble.style.right = "auto";
-        bubble.style.maxWidth = `${spaceRight}px`;
-      }
+      // Fall back to left-aligned from the button, clamped to viewport edges.
+      bubble.style.left = `${Math.max(8, Math.min(btnRect.left, vw - maxW - 8))}px`;
     }
   }, []);
 
+  const hide = useCallback(() => {
+    const bubble = bubbleRef.current;
+    if (!bubble) return;
+    bubble.style.position = "";
+    bubble.style.top = "";
+    bubble.style.left = "";
+    bubble.style.maxWidth = "";
+  }, []);
+
   return (
-    <span className="field-help">
+    <span className="field-help" onMouseLeave={hide} onBlurCapture={hide}>
       <button
         ref={buttonRef}
         type="button"
         className="field-help__button"
         aria-label={`More information about ${label}`}
         aria-describedby={id}
-        onMouseEnter={reposition}
-        onFocus={reposition}
+        onMouseEnter={show}
+        onFocus={show}
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();

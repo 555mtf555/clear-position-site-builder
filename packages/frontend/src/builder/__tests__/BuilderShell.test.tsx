@@ -98,6 +98,14 @@ describe("BuilderShell back navigation", () => {
     expect(link).toBeInTheDocument();
   });
 
+  it("shows a canvas empty state when the page has no sections", async () => {
+    setupEditor();
+    render(<BuilderShell pageId="page_home" />);
+    // mockPage has sections: [] so the empty state should render
+    expect(await screen.findByLabelText("Empty page")).toBeInTheDocument();
+    expect(screen.getByText(/no sections yet/i)).toBeInTheDocument();
+  });
+
   it("uses the ?from= query param as the back link href when present", async () => {
     window.history.pushState({}, "", "/editor/page_home?from=/companies/co_test/sites");
     setupEditor();

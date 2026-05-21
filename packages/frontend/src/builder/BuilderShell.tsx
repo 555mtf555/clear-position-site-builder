@@ -131,6 +131,15 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
           </div>
         ) : null}
         <div className="builder-preview__canvas">
+          {editor.draftPage.doc.sections.length === 0 ? (
+            <div className="canvas-empty" aria-label="Empty page">
+              <p className="canvas-empty__title">This page has no sections yet</p>
+              <p className="canvas-empty__hint">
+                Use <strong>Add section</strong> in the left panel to add content,
+                or pick a template to start with a complete layout.
+              </p>
+            </div>
+          ) : null}
           <PageRenderer page={editor.draftPage} />
         </div>
       </main>

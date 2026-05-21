@@ -18,7 +18,8 @@
       "Bash(sed -i 's/clsx\\(\"content-section\", \"content-section--solution\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", \"content-section--solution\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' SolutionSection.tsx)",
       "Bash(sed -i 's/clsx\\(\"content-section\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ProcessSection.tsx)",
       "Bash(sed -i 's/clsx\\(\"content-section\", \"content-section--proof\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", \"content-section--proof\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ProofSection.tsx)",
-      "Bash(npm -w packages/backend run test)"
+      "Bash(npm -w packages/backend run test)",
+      "Bash(npm -w packages/frontend run test)"
     ]
   }
 }

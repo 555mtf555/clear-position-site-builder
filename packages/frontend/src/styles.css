@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #111111;
-  background: #ffffff;
+  background: #f7f8f6;
 }
 
 * {
@@ -10,6 +10,7 @@
 
 body {
   margin: 0;
+  background: #f7f8f6;
 }
 
 a {
@@ -505,19 +506,59 @@ textarea {
   background: #ffffff;
   color: #20251f;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.button:hover:not(:disabled) {
+  border-color: #9bb39c;
+  background: #f9faf8;
 }
 
 .button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.5;
+}
+
+/* Ghost / tertiary — for low-emphasis actions like Discard */
+.button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #677064;
+  font-weight: 500;
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: #f3f5f1;
+  border-color: #cdd6ca;
+  color: #20251f;
+}
+
+/* Secondary — for Export-type actions */
+.button--secondary {
+  background: #f7f8f6;
+  border-color: #cdd6ca;
+  color: #394136;
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: #edf0eb;
+  border-color: #9bb39c;
 }
 
 .button--primary {
-  border-color: #255741;
-  background: #255741;
+  border-color: #1e5c39;
+  background: linear-gradient(180deg, #2d7049 0%, #255741 100%);
   color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 1px rgba(37,87,65,.6) inset;
+  font-weight: 700;
 }
+
+.button--primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2d7049 0%, #1e5c39 100%);
+  box-shadow: 0 2px 6px rgba(0,0,0,.16), 0 0 0 1px rgba(37,87,65,.6) inset;
+}
+
 
 .inspector-status {
   border-radius: 7px;
@@ -2793,4 +2834,295 @@ details[open] .panel-summary-row > span:first-child::before {
   font-weight: 900;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+/* ─── Visual polish pass ─────────────────────────────────────────────────── */
+
+/* Dashboard panels: soft shadow so panels lift off the warm background */
+.dashboard__create-site,
+.workflow-guide,
+.site-card,
+.brand-kit-panel {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .06), 0 0 0 1px rgba(37, 87, 65, .05);
+}
+
+/* Dashboard page header: company name area */
+.dashboard__header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1a2318;
+}
+
+/* Workflow guide: better heading */
+.workflow-guide__title {
+  color: #255741;
+}
+
+/* Create site form: white background to stand out from page */
+.dashboard__create-site {
+  background: #ffffff;
+}
+
+/* Site card: white */
+.site-card {
+  background: #ffffff;
+}
+
+/* Site card title hierarchy */
+.site-card__header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Pages within site card */
+.site-card__pages h4 {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #596154;
+}
+
+/* Page list items */
+.site-card__pages li a {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ─── Editor top bar polish ──────────────────────────────────────────────── */
+
+.builder-preview__bar {
+  min-height: 52px;
+  background: #ffffff;
+  box-shadow: 0 1px 0 #dde2d8;
+}
+
+/* Back link: clearly navigation, not action */
+.builder-preview__back {
+  font-size: 12px;
+  font-weight: 500;
+  color: #677064;
+  letter-spacing: 0;
+  text-decoration: none;
+  opacity: 1;
+  flex-shrink: 0;
+}
+
+.builder-preview__back:hover {
+  color: #255741;
+  text-decoration: underline;
+}
+
+/* Page title in top bar */
+.builder-preview__bar > div > strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a2318;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+/* Unsaved/saved indicator */
+.builder-preview__bar > div > span[aria-live] {
+  font-size: 12px;
+  color: #677064;
+  white-space: nowrap;
+}
+
+/* Export actions: secondary weight */
+.builder-preview__actions .button {
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 32px;
+  padding: 0 10px;
+  background: #f7f8f6;
+  border-color: #cdd6ca;
+}
+
+/* Open preview link in toolbar */
+.builder-preview__actions > a {
+  font-size: 13px;
+  font-weight: 500;
+  color: #596154;
+}
+
+.builder-preview__actions > a:hover {
+  color: #255741;
+  text-decoration: underline;
+}
+
+/* ─── Inspector sidebar polish ───────────────────────────────────────────── */
+
+.builder-sidebar--right {
+  background: #fafbf9;
+}
+
+/* Inspector actions: tighter */
+.inspector-actions {
+  gap: 8px;
+  margin-bottom: 12px;
+  grid-template-columns: 1fr auto;
+}
+
+/* Save should be full-width primary; Discard is auto-width ghost */
+.inspector-actions .button--primary {
+  min-height: 36px;
+}
+
+.inspector-actions .button--ghost {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+/* Inspector form labels */
+.inspector-form label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #394136;
+}
+
+/* ─── Left sidebar polish ────────────────────────────────────────────────── */
+
+.builder-sidebar--left {
+  background: #fafbf9;
+}
+
+.builder-sidebar__header {
+  background: #ffffff;
+  border-bottom: 1px solid #e8ede5;
+  padding: 14px 16px;
+}
+
+.builder-sidebar__header strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a2318;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Canvas / preview area polish ──────────────────────────────────────── */
+
+.builder-preview__canvas {
+  background: #e8ede5;
+}
+
+/* Frame the page renderer on a white surface */
+.builder-preview__canvas .page-renderer {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08), 0 8px 32px rgba(0, 0, 0, .1);
+  min-height: calc(100vh - 52px);
+  margin: 0 auto;
+}
+
+/* Canvas empty state */
+.canvas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 48px 24px;
+  text-align: center;
+  color: #677064;
+  gap: 10px;
+}
+
+.canvas-empty__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #394136;
+  letter-spacing: -0.01em;
+}
+
+.canvas-empty__hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 300px;
+  color: #677064;
+}
+
+.canvas-empty__hint strong {
+  color: #394136;
+}
+
+/* ─── Review status bar: single location, compact ───────────────────────── */
+
+.export-hint {
+  font-size: 12px;
+  padding: 5px 16px;
+  font-weight: 500;
+}
+
+/* ─── Empty states (no-pages, no-selection) ─────────────────────────────── */
+
+/* No pages yet inside a site card */
+.site-card__pages .muted {
+  font-size: 13px;
+  color: #677064;
+  padding: 8px 0;
+}
+
+/* Inspector: no section selected */
+.inspector-empty {
+  color: #677064;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 16px;
+  border: 1px dashed #cdd6ca;
+  border-radius: 8px;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* Section list empty state */
+.section-list__empty {
+  padding: 16px 12px;
+  color: #677064;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.5;
+  border: 1px dashed #cdd6ca;
+  border-radius: 7px;
+  margin: 8px 12px;
+}
+
+/* ─── Field-level improvements ───────────────────────────────────────────── */
+
+/* Required badge */
+.required-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Compact helper text */
+.compact-helper {
+  font-size: 11px;
+  color: #677064;
+}
+
+/* Muted text utility */
+.muted {
+  color: #677064;
+  font-size: 13px;
+}
+
+/* ─── Field-help tooltip: critical — uses position:fixed in JS ──────────── */
+
+/* The bubble CSS position is a fallback; JS sets position:fixed on show */
+.field-help__bubble {
+  /* Ensure text wraps and does not overflow */
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  /* Remove max-width constraint that can fight JS override */
+  max-width: min(260px, calc(100vw - 32px));
 }
