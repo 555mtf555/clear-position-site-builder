@@ -160,6 +160,11 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
                 editor.setSelectedSectionId(sectionId);
                 setSelectedPreviewItem({ sectionId, itemKind, itemIndex });
               },
+              onMoveSection: editor.moveSection,
+              onDeleteSection: (sectionId) => {
+                editor.deleteSection(sectionId);
+              },
+              selectedPreviewItem,
             }}
           />
         </div>

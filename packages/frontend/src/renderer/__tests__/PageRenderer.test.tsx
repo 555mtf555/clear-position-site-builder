@@ -397,6 +397,148 @@ describe("PageRenderer editor context", () => {
     expect(onSelectItem).not.toHaveBeenCalled();
   });
 
+  it("shows a mini-toolbar when a section is selected", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: "hero_1", onSelectSection: vi.fn() }}
+      />,
+    );
+    expect(container.querySelector(".editor-toolbar")).not.toBeNull();
+  });
+
+  it("does not show a mini-toolbar when no section is selected", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: null, onSelectSection: vi.fn() }}
+      />,
+    );
+    expect(container.querySelector(".editor-toolbar")).toBeNull();
+  });
+
+  it("does not render a toolbar without editorContext", () => {
+    const { container } = render(<PageRenderer page={page} />);
+    expect(container.querySelector(".editor-toolbar")).toBeNull();
+  });
+
+  it("toolbar Move up button calls onMoveSection with 'up'", () => {
+    const onMoveSection = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "problem_1",
+          onSelectSection: vi.fn(),
+          onMoveSection,
+        }}
+      />,
+    );
+    const btn = container.querySelector("[aria-label='Move section up']") as HTMLElement;
+    expect(btn).not.toBeNull();
+    fireEvent.click(btn);
+    expect(onMoveSection).toHaveBeenCalledWith("problem_1", "up");
+  });
+
+  it("toolbar Move up button is disabled for the first section", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "hero_1",
+          onSelectSection: vi.fn(),
+          onMoveSection: vi.fn(),
+        }}
+      />,
+    );
+    const btn = container.querySelector("[aria-label='Move section up']") as HTMLButtonElement;
+    expect(btn?.disabled).toBe(true);
+  });
+
+  it("toolbar Move down button calls onMoveSection with 'down'", () => {
+    const onMoveSection = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "problem_1",
+          onSelectSection: vi.fn(),
+          onMoveSection,
+        }}
+      />,
+    );
+    const btn = container.querySelector("[aria-label='Move section down']") as HTMLElement;
+    fireEvent.click(btn);
+    expect(onMoveSection).toHaveBeenCalledWith("problem_1", "down");
+  });
+
+  it("toolbar Delete button calls onDeleteSection", () => {
+    const onDeleteSection = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "hero_1",
+          onSelectSection: vi.fn(),
+          onDeleteSection,
+        }}
+      />,
+    );
+    const btn = container.querySelector("[aria-label='Delete section']") as HTMLElement;
+    expect(btn).not.toBeNull();
+    fireEvent.click(btn);
+    expect(onDeleteSection).toHaveBeenCalledWith("hero_1");
+  });
+
+  it("toolbar button clicks stop propagation and do not re-trigger selection", () => {
+    const onSelectSection = vi.fn();
+    const onMoveSection = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "hero_1",
+          onSelectSection,
+          onMoveSection,
+        }}
+      />,
+    );
+    const btn = container.querySelector("[aria-label='Move section up']") as HTMLElement;
+    fireEvent.click(btn);
+    // onSelectSection should NOT be called again from toolbar button click
+    expect(onSelectSection).not.toHaveBeenCalled();
+  });
+
+  it("toolbar shows item badge when selectedPreviewItem matches the selected section", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "services_1",
+          onSelectSection: vi.fn(),
+          selectedPreviewItem: { sectionId: "services_1", itemKind: "card", itemIndex: 1 },
+        }}
+      />,
+    );
+    const itemInfo = container.querySelector(".editor-toolbar__item-info");
+    expect(itemInfo?.textContent).toContain("Card 2");
+  });
+
+  it("toolbar does not show item badge for a different section", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{
+          selectedSectionId: "hero_1",
+          onSelectSection: vi.fn(),
+          selectedPreviewItem: { sectionId: "services_1", itemKind: "card", itemIndex: 0 },
+        }}
+      />,
+    );
+    // hero is selected but selectedPreviewItem is for services → no item badge in hero toolbar
+    expect(container.querySelector(".editor-toolbar__item-info")).toBeNull();
+  });
+
   it("clicking a section from sidebar clears and does not call onSelectItem", () => {
     const onSelectSection = vi.fn();
     const onSelectItem = vi.fn();
