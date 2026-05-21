@@ -2,6 +2,7 @@ import type { ProofSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
+import { ItemStyleControls } from "./ItemStyleControls";
 
 export function ProofInspector({
   section,
@@ -44,6 +45,15 @@ export function ProofInspector({
               error={issueForPath(validationIssues, `metrics.${index}.label`)}
               onChange={(label) => updateMetric({ ...metric, label })}
             />
+            <details className="inspector-section">
+              <summary>Metric style</summary>
+              <div className="inspector-section__body">
+                <ItemStyleControls
+                  style={metric.style}
+                  onChange={(style) => updateMetric({ ...metric, style })}
+                />
+              </div>
+            </details>
           </>
         )}
       />

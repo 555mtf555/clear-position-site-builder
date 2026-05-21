@@ -2,6 +2,7 @@ import type { ServicesSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
+import { ItemStyleControls } from "./ItemStyleControls";
 
 export function ServicesInspector({
   section,
@@ -43,6 +44,15 @@ export function ServicesInspector({
               error={issueForPath(validationIssues, `services.${index}.description`)}
               onChange={(description) => updateService({ ...service, description })}
             />
+            <details className="inspector-section">
+              <summary>Card style</summary>
+              <div className="inspector-section__body">
+                <ItemStyleControls
+                  style={service.style}
+                  onChange={(style) => updateService({ ...service, style })}
+                />
+              </div>
+            </details>
           </>
         )}
       />

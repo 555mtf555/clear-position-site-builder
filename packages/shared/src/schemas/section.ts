@@ -61,9 +61,28 @@ const SectionStyleProps = z.object({
   font_family_preset: FontFamilyPreset.optional(),
 });
 
+// ── Per-item text style ────────────────────────────────────────────────────
+// Controlled enums — no arbitrary CSS strings allowed.
+
+export const ItemTextSize = z.enum(["default", "small", "large", "display"]);
+export type ItemTextSize = z.infer<typeof ItemTextSize>;
+
+export const ItemTextWeight = z.enum(["default", "medium", "bold"]);
+export type ItemTextWeight = z.infer<typeof ItemTextWeight>;
+
+export const TextStyle = z.object({
+  color: HexColor.optional(),
+  size: ItemTextSize.optional(),
+  font: FontFamilyPreset.optional(),
+  weight: ItemTextWeight.optional(),
+});
+export type TextStyle = z.infer<typeof TextStyle>;
+
+// Card with optional per-item text style
 const Card = z.object({
   title: z.string().min(1, "Title is required."),
   description: z.string().min(1, "Description is required."),
+  style: TextStyle.optional(),
 });
 
 const HeroProps = z
@@ -127,6 +146,7 @@ export const ProofSectionSchema = SectionBase.extend({
     metrics: z.array(z.object({
       value: z.string().min(1, "Metric value is required."),
       label: z.string().min(1, "Metric label is required."),
+      style: TextStyle.optional(),
     })).default([]),
   }),
 });
@@ -150,6 +170,7 @@ export const FaqSectionSchema = SectionBase.extend({
     items: z.array(z.object({
       question: z.string().min(1, "Question is required."),
       answer: z.string().min(1, "Answer is required."),
+      style: TextStyle.optional(),
     })).min(1, "Add at least one FAQ item."),
   }),
 });

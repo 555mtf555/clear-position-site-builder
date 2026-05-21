@@ -2,6 +2,7 @@ import type { FaqSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
+import { ItemStyleControls } from "./ItemStyleControls";
 
 export function FaqInspector({
   section,
@@ -43,6 +44,15 @@ export function FaqInspector({
               error={issueForPath(validationIssues, `items.${index}.answer`)}
               onChange={(answer) => updateItem({ ...item, answer })}
             />
+            <details className="inspector-section">
+              <summary>Item style</summary>
+              <div className="inspector-section__body">
+                <ItemStyleControls
+                  style={item.style}
+                  onChange={(style) => updateItem({ ...item, style })}
+                />
+              </div>
+            </details>
           </>
         )}
       />

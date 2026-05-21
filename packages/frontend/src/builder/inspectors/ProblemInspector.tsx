@@ -2,6 +2,7 @@ import type { ProblemSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
+import { ItemStyleControls } from "./ItemStyleControls";
 
 export function ProblemInspector({
   section,
@@ -44,6 +45,15 @@ export function ProblemInspector({
               error={issueForPath(validationIssues, `problems.${index}.description`)}
               onChange={(description) => updateProblem({ ...problem, description })}
             />
+            <details className="inspector-section">
+              <summary>Card style</summary>
+              <div className="inspector-section__body">
+                <ItemStyleControls
+                  style={problem.style}
+                  onChange={(style) => updateProblem({ ...problem, style })}
+                />
+              </div>
+            </details>
           </>
         )}
       />

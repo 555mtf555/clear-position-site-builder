@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ProofSection as ProofSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses } from "../sectionStyle";
+import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
 
 export function ProofSection({ section }: { section: ProofSectionType }) {
   const { props } = section;
@@ -20,7 +20,7 @@ export function ProofSection({ section }: { section: ProofSectionType }) {
         {props.metrics.length > 0 ? (
           <div className="metric-grid">
             {props.metrics.map((metric) => (
-              <div className="metric" key={`${metric.value}-${metric.label}`}>
+              <div className="metric" key={`${metric.value}-${metric.label}`} style={itemStyle(metric.style)}>
                 <strong>{metric.value}</strong>
                 <span>{metric.label}</span>
               </div>

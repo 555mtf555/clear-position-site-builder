@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ServicesSection as ServicesSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses } from "../sectionStyle";
+import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
 
 export function ServicesSection({ section }: { section: ServicesSectionType }) {
   const { props } = section;
@@ -13,7 +13,7 @@ export function ServicesSection({ section }: { section: ServicesSectionType }) {
         <h2>{props.headline}</h2>
         <div className="card-grid">
           {props.services.map((service) => (
-            <article className="section-card" key={service.title}>
+            <article className="section-card" key={service.title} style={itemStyle(service.style)}>
               <h3>{service.title}</h3>
               <p>{service.description}</p>
             </article>

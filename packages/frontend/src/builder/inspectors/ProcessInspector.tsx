@@ -2,6 +2,7 @@ import type { ProcessSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
+import { ItemStyleControls } from "./ItemStyleControls";
 
 export function ProcessInspector({
   section,
@@ -43,6 +44,15 @@ export function ProcessInspector({
               error={issueForPath(validationIssues, `steps.${index}.description`)}
               onChange={(description) => updateStep({ ...step, description })}
             />
+            <details className="inspector-section">
+              <summary>Step style</summary>
+              <div className="inspector-section__body">
+                <ItemStyleControls
+                  style={step.style}
+                  onChange={(style) => updateStep({ ...step, style })}
+                />
+              </div>
+            </details>
           </>
         )}
       />

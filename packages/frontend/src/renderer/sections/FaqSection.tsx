@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { FaqSection as FaqSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses } from "../sectionStyle";
+import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
 
 export function FaqSection({ section }: { section: FaqSectionType }) {
   const { props } = section;
@@ -13,7 +13,7 @@ export function FaqSection({ section }: { section: FaqSectionType }) {
         <h2>{props.headline}</h2>
         <div className="faq-list">
           {props.items.map((item) => (
-            <article key={item.question}>
+            <article key={item.question} style={itemStyle(item.style)}>
               <h3>{item.question}</h3>
               <p>{item.answer}</p>
             </article>

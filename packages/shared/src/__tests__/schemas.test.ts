@@ -153,6 +153,81 @@ describe("Page schema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("accepts a card with an optional TextStyle", () => {
+    const result = Section.safeParse({
+      id: "sec_services",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          {
+            title: "Sprint",
+            description: "A sprint.",
+            style: { color: "#255741", size: "large", font: "serif", weight: "bold" },
+          },
+        ],
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "services") {
+      expect(result.data.props.services[0]?.style?.size).toBe("large");
+    }
+  });
+
+  it("accepts a card without a TextStyle (backward-compatible)", () => {
+    const result = Section.safeParse({
+      id: "sec_services",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "A sprint." }],
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success && result.data.type === "services") {
+      expect(result.data.props.services[0]?.style).toBeUndefined();
+    }
+  });
+
+  it("rejects a TextStyle with an invalid size value", () => {
+    const result = Section.safeParse({
+      id: "sec_services",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "A sprint.", style: { size: "huge" } }],
+      },
+      elements: [],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts FAQ items and proof metrics with optional TextStyle", () => {
+    const faqResult = Section.safeParse({
+      id: "sec_faq",
+      type: "faq",
+      props: {
+        headline: "FAQ",
+        items: [{ question: "How?", answer: "Like this.", style: { weight: "bold" } }],
+      },
+      elements: [],
+    });
+    expect(faqResult.success).toBe(true);
+
+    const proofResult = Section.safeParse({
+      id: "sec_proof",
+      type: "proof",
+      props: {
+        headline: "Proof",
+        metrics: [{ value: "2x", label: "faster", style: { color: "#255741" } }],
+      },
+      elements: [],
+    });
+    expect(proofResult.success).toBe(true);
+  });
+
   it("accepts a section with an optional variant", () => {
     const result = Section.safeParse({
       id: "sec_services",

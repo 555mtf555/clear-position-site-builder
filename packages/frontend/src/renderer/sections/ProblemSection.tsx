@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ProblemSection as ProblemSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses } from "../sectionStyle";
+import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
 
 export function ProblemSection({ section }: { section: ProblemSectionType }) {
   const { props } = section;
@@ -14,7 +14,7 @@ export function ProblemSection({ section }: { section: ProblemSectionType }) {
         {props.intro ? <p className="content-section__intro">{props.intro}</p> : null}
         <div className="card-grid">
           {props.problems.map((problem) => (
-            <article className="section-card" key={problem.title}>
+            <article className="section-card" key={problem.title} style={itemStyle(problem.style)}>
               <h3>{problem.title}</h3>
               <p>{problem.description}</p>
             </article>

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ProcessSection as ProcessSectionType } from "@clear-position/shared";
-import { sectionStyle, typographyClasses } from "../sectionStyle";
+import { sectionStyle, typographyClasses, itemStyle } from "../sectionStyle";
 
 export function ProcessSection({ section }: { section: ProcessSectionType }) {
   const { props } = section;
@@ -13,7 +13,7 @@ export function ProcessSection({ section }: { section: ProcessSectionType }) {
         <h2>{props.headline}</h2>
         <div className="step-list">
           {props.steps.map((step, index) => (
-            <article className="step-card" key={step.title}>
+            <article className="step-card" key={step.title} style={itemStyle(step.style)}>
               <span>{index + 1}</span>
               <h3>{step.title}</h3>
               <p>{step.description}</p>

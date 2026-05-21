@@ -20,7 +20,14 @@
       "Bash(sed -i 's/clsx\\(\"content-section\", \"content-section--proof\", `section--\\\\${variant}`\\)/clsx\\(\"content-section\", \"content-section--proof\", `section--${variant}`, ...typographyClasses\\(props\\)\\)/g' ProofSection.tsx)",
       "Bash(npm -w packages/backend run test)",
       "Bash(npm -w packages/frontend run test)",
-      "Bash(node append-theme.js)"
+      "Bash(node append-theme.js)",
+      "Bash(sed -i 's|<article className=\"section-card\" key={service.title}>|<article className=\"section-card\" key={service.title} style={itemStyle\\(service.style\\)}>|' ServicesSection.tsx)",
+      "Bash(sed -i 's|<article className=\"section-card\" key={problem.title}>|<article className=\"section-card\" key={problem.title} style={itemStyle\\(problem.style\\)}>|' ProblemSection.tsx)",
+      "Bash(sed -i 's|<article className=\"step-card\" key={step.title}>|<article className=\"step-card\" key={step.title} style={itemStyle\\(step.style\\)}>|' ProcessSection.tsx)",
+      "Bash(sed -i 's|<article key={item.question}>|<article key={item.question} style={itemStyle\\(item.style\\)}>|' FaqSection.tsx)",
+      "Bash(sed -i 's|<div className=\"metric\" key={`${metric.value}-${metric.label}`}>|<div className=\"metric\" key={`${metric.value}-${metric.label}`} style={itemStyle\\(metric.style\\)}>|' ProofSection.tsx)",
+      "Bash(node -e ' *)",
+      "Bash(npm -w packages/frontend run typecheck)"
     ]
   }
 }

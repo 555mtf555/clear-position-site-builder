@@ -154,7 +154,7 @@ export function RepeatedFieldList<T>({
   /** Singular label used in the item legend and confirm dialog. Defaults to auto-singularized `label`. */
   itemLabel?: string;
   items: T[];
-  createItem: () => T;
+  createItem: () => NoInfer<T>;
   onChange: (items: T[]) => void;
   renderItem: (item: T, index: number, updateItem: (nextItem: T) => void) => ReactNode;
   /** Guidance hint shown below the header (e.g. "Recommended: 3 cards"). */
