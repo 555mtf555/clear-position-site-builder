@@ -276,6 +276,142 @@ describe("PageRenderer", () => {
   });
 });
 
+describe("PageRenderer inline editing", () => {
+  const inlineEditorPage: typeof page = {
+    ...page,
+    doc: {
+      ...page.doc,
+      sections: [
+        {
+          id: "hero_1",
+          type: "hero",
+          props: {
+            headline: "A sharper business website",
+            subhead: "Built from JSON.",
+            cta_text: "Get started",
+            cta_href: "/contact",
+            text_align: "left",
+            background_size: "cover",
+            background_position: "center",
+          },
+          elements: [],
+        },
+      ],
+    },
+  };
+
+  it("hero headline has inline-editable class in editor mode", () => {
+    const { container } = render(
+      <PageRenderer
+        page={inlineEditorPage}
+        editorContext={{
+          selectedSectionId: null,
+          onSelectSection: vi.fn(),
+          onStartInlineEdit: vi.fn(),
+          onCommitInlineEdit: vi.fn(),
+          onCancelInlineEdit: vi.fn(),
+        }}
+      />,
+    );
+    const heading = container.querySelector("h1");
+    expect(heading).toHaveClass("inline-editable");
+  });
+
+  it("hero headline has no inline-editable class without editorContext", () => {
+    const { container } = render(<PageRenderer page={inlineEditorPage} />);
+    const heading = container.querySelector("h1");
+    expect(heading).not.toHaveClass("inline-editable");
+  });
+
+  it("clicking hero headline calls onStartInlineEdit with correct path", () => {
+    const onStartInlineEdit = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={inlineEditorPage}
+        editorContext={{
+          selectedSectionId: null,
+          onSelectSection: vi.fn(),
+          onStartInlineEdit,
+          onCommitInlineEdit: vi.fn(),
+          onCancelInlineEdit: vi.fn(),
+        }}
+      />,
+    );
+    const heading = container.querySelector("h1.inline-editable") as HTMLElement;
+    fireEvent.click(heading);
+    expect(onStartInlineEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ sectionId: "hero_1", field: "headline" }),
+      "A sharper business website",
+    );
+  });
+
+  it("renders an input when the inline edit path matches the headline", () => {
+    const { container } = render(
+      <PageRenderer
+        page={inlineEditorPage}
+        editorContext={{
+          selectedSectionId: null,
+          onSelectSection: vi.fn(),
+          onStartInlineEdit: vi.fn(),
+          onCommitInlineEdit: vi.fn(),
+          onCancelInlineEdit: vi.fn(),
+          inlineEdit: { path: { sectionId: "hero_1", field: "headline", required: true } },
+        }}
+      />,
+    );
+    const input = container.querySelector("input.inline-editor");
+    expect(input).not.toBeNull();
+    expect((input as HTMLInputElement)?.value).toBe("A sharper business website");
+  });
+
+  it("pressing Enter on the inline input calls onCommitInlineEdit", () => {
+    const onCommitInlineEdit = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={inlineEditorPage}
+        editorContext={{
+          selectedSectionId: null,
+          onSelectSection: vi.fn(),
+          onStartInlineEdit: vi.fn(),
+          onCommitInlineEdit,
+          onCancelInlineEdit: vi.fn(),
+          inlineEdit: { path: { sectionId: "hero_1", field: "headline", required: true } },
+        }}
+      />,
+    );
+    const input = container.querySelector("input.inline-editor") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Updated headline" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onCommitInlineEdit).toHaveBeenCalledWith("Updated headline");
+  });
+
+  it("pressing Escape calls onCancelInlineEdit", () => {
+    const onCancelInlineEdit = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={inlineEditorPage}
+        editorContext={{
+          selectedSectionId: null,
+          onSelectSection: vi.fn(),
+          onStartInlineEdit: vi.fn(),
+          onCommitInlineEdit: vi.fn(),
+          onCancelInlineEdit,
+          inlineEdit: { path: { sectionId: "hero_1", field: "headline" } },
+        }}
+      />,
+    );
+    const input = container.querySelector("input.inline-editor") as HTMLInputElement;
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(onCancelInlineEdit).toHaveBeenCalled();
+  });
+
+  it("export-mode page has no inline-editable classes (no editorContext)", () => {
+    const { container } = render(<PageRenderer page={inlineEditorPage} />);
+    expect(container.querySelectorAll(".inline-editable")).toHaveLength(0);
+    expect(container.querySelectorAll(".inline-editor")).toHaveLength(0);
+  });
+});
+
 describe("PageRenderer editor context", () => {
   it("does not add editor-selectable elements when editorContext is absent", () => {
     const { container } = render(<PageRenderer page={page} />);

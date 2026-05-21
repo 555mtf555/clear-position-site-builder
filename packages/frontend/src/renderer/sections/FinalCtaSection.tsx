@@ -1,5 +1,6 @@
 import type { FinalCtaSection as FinalCtaSectionType } from "@clear-position/shared";
 import clsx from "clsx";
+import { EditableText } from "../InlineEdit";
 
 export function FinalCtaSection({ section }: { section: FinalCtaSectionType }) {
   const { props } = section;
@@ -18,12 +19,18 @@ export function FinalCtaSection({ section }: { section: FinalCtaSectionType }) {
     >
       <div className="final-cta-section__inner">
         {props.eyebrow ? <p className="content-section__eyebrow">{props.eyebrow}</p> : null}
-        <h2>{props.headline}</h2>
-        {props.subhead ? <p>{props.subhead}</p> : null}
+        <EditableText tag="h2" path={{ sectionId: section.id, field: "headline", required: true }}>
+          {props.headline}
+        </EditableText>
+        {props.subhead ? (
+          <EditableText tag="p" path={{ sectionId: section.id, field: "subhead", multiline: true }}>
+            {props.subhead}
+          </EditableText>
+        ) : null}
         {props.cta_text && props.cta_href ? (
-          <a className="hero-section__cta" href={props.cta_href}>
+          <EditableText tag="a" className="hero-section__cta" href={props.cta_href} path={{ sectionId: section.id, field: "cta_text" }}>
             {props.cta_text}
-          </a>
+          </EditableText>
         ) : null}
       </div>
     </section>

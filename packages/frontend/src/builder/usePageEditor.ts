@@ -437,6 +437,56 @@ export function usePageEditor(pageId: string) {
     }
   }, [draftPage, isDirty]);
 
+  /** Updates props of a section identified by ID (does not require selectedSectionId). */
+  const updateSectionPropById = useCallback((sectionId: string, patch: SectionPropsPatch) => {
+    setDraftPage((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        doc: {
+          ...current.doc,
+          sections: current.doc.sections.map((section) => {
+            if (section.id !== sectionId) return section;
+            return {
+              ...section,
+              props: { ...(section.props as Record<string, unknown>), ...patch } as typeof section.props,
+            } as Section;
+          }),
+        },
+      };
+    });
+    markEditing();
+  }, [markEditing]);
+
+  /** Updates a single field on one item inside an array prop of a section. */
+  const updateSectionItemInArray = useCallback(
+    (sectionId: string, arrayField: string, itemIndex: number, patch: Record<string, unknown>) => {
+      setDraftPage((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          doc: {
+            ...current.doc,
+            sections: current.doc.sections.map((section) => {
+              if (section.id !== sectionId) return section;
+              const arr = (section.props as Record<string, unknown>)[arrayField];
+              if (!Array.isArray(arr)) return section;
+              const newArr = (arr as unknown[]).map((item, i) =>
+                i === itemIndex ? { ...(item as Record<string, unknown>), ...patch } : item,
+              );
+              return {
+                ...section,
+                props: { ...(section.props as Record<string, unknown>), [arrayField]: newArr } as typeof section.props,
+              } as Section;
+            }),
+          },
+        };
+      });
+      markEditing();
+    },
+    [markEditing],
+  );
+
   const updateSelectedSectionVariant = useCallback((variant: Section["variant"]) => {
     setDraftPage((current) => {
       if (!current || !selectedSectionId) return current;
@@ -483,6 +533,8 @@ export function usePageEditor(pageId: string) {
     updatePageMetadata,
     updateSelectedSectionProps,
     updateSelectedSectionVariant,
+    updateSectionPropById,
+    updateSectionItemInArray,
     usedAssetIds,
     validationIssues,
   };

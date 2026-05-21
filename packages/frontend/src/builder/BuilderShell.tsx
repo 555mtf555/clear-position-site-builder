@@ -5,6 +5,7 @@ import { SectionList } from "./SectionList";
 import { usePageEditor } from "./usePageEditor";
 import type { ItemKind } from "../renderer/PageRenderer";
 import { PageRenderer } from "../renderer/PageRenderer";
+import type { InlineEditPath } from "../renderer/InlineEdit";
 import { getSite } from "../api/client";
 
 interface SelectedPreviewItem {
@@ -35,6 +36,7 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
   const fromParam = useMemo(safeBackLink, []);
   const [derivedSiteHref, setDerivedSiteHref] = useState<string | null>(null);
   const [selectedPreviewItem, setSelectedPreviewItem] = useState<SelectedPreviewItem | null>(null);
+  const [inlineEditState, setInlineEditState] = useState<{ path: InlineEditPath } | null>(null);
 
   // When there is no ?from= param, derive the dashboard URL from the page's site_id.
   useEffect(() => {
@@ -165,6 +167,25 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
                 editor.deleteSection(sectionId);
               },
               selectedPreviewItem,
+              inlineEdit: inlineEditState,
+              onStartInlineEdit: (path, _currentValue) => {
+                editor.setSelectedSectionId(path.sectionId);
+                setSelectedPreviewItem(null);
+                setInlineEditState({ path });
+              },
+              onCommitInlineEdit: (value) => {
+                if (!inlineEditState) return;
+                const { path } = inlineEditState;
+                setInlineEditState(null);
+                if (path.arrayField !== undefined && path.itemIndex !== undefined) {
+                  editor.updateSectionItemInArray(path.sectionId, path.arrayField, path.itemIndex, { [path.field]: value });
+                } else {
+                  editor.updateSectionPropById(path.sectionId, { [path.field]: value });
+                }
+              },
+              onCancelInlineEdit: () => {
+                setInlineEditState(null);
+              },
             }}
           />
         </div>

@@ -3471,3 +3471,47 @@ details[open] .panel-summary-row > span:first-child::before {
   border-left: 1px solid rgba(192, 124, 20, 0.35);
   line-height: 1;
 }
+
+/* ── Inline text editing (editor mode only) ─────────────────────────────── */
+
+.inline-editable {
+  cursor: text;
+  border-radius: 3px;
+  transition: outline 0.1s ease;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+}
+
+.inline-editable:hover {
+  outline-color: rgba(37, 87, 65, 0.5);
+  background: rgba(37, 87, 65, 0.04);
+}
+
+.inline-editor {
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: rgba(19, 30, 17, 0.88);
+  color: #c8d8c2;
+  border: 2px solid var(--cp-green, #255741);
+  border-radius: 4px;
+  padding: 4px 8px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 87, 65, 0.25);
+}
+
+.inline-editor:focus {
+  border-color: #4aa87a;
+  box-shadow: 0 0 0 3px rgba(37, 87, 65, 0.35);
+}
+
+.inline-editor--multiline {
+  resize: vertical;
+  min-height: 3em;
+}
+
+.inline-editor--input {
+  /* Match common heading/text widths */
+  max-width: 100%;
+}

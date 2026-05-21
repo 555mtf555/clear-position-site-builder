@@ -8,6 +8,7 @@ import { ProofSection } from "./sections/ProofSection";
 import { ServicesSection } from "./sections/ServicesSection";
 import { SolutionSection } from "./sections/SolutionSection";
 import { brandKitToCssVars } from "./brandTheme";
+import { InlineEditContext, type InlineEditPath } from "./InlineEdit";
 
 // ── Editor context (absent = public/export mode, no selection UI) ─────────
 
@@ -25,6 +26,14 @@ export interface EditorContext {
   onDeleteSection?: (sectionId: string) => void;
   /** The item currently selected via preview click, for toolbar item badge. */
   selectedPreviewItem?: { sectionId: string; itemKind: ItemKind; itemIndex: number } | null;
+  /** Active inline edit — which field is currently being edited. */
+  inlineEdit?: { path: InlineEditPath } | null;
+  /** Start editing a specific text field. */
+  onStartInlineEdit?: (path: InlineEditPath, currentValue: string) => void;
+  /** Commit the current inline edit with the given value. */
+  onCommitInlineEdit?: (value: string) => void;
+  /** Cancel the current inline edit without saving. */
+  onCancelInlineEdit?: () => void;
 }
 
 interface PageRendererProps {
@@ -35,8 +44,21 @@ interface PageRendererProps {
 }
 
 export function PageRenderer({ page, brandKit, editorContext }: PageRendererProps) {
+  // Build the InlineEditContext value from editorContext (null when absent = no inline editing).
+  const inlineEditCtx = editorContext && (
+    editorContext.onStartInlineEdit ||
+    editorContext.onCommitInlineEdit ||
+    editorContext.onCancelInlineEdit
+  ) ? {
+    activeEdit: editorContext.inlineEdit ?? null,
+    startEdit: editorContext.onStartInlineEdit ?? (() => {}),
+    commitEdit: editorContext.onCommitInlineEdit ?? (() => {}),
+    cancelEdit: editorContext.onCancelInlineEdit ?? (() => {}),
+  } : null;
+
   return (
     <main className="page-renderer" aria-label={page.title} style={brandKitToCssVars(brandKit)}>
+      <InlineEditContext.Provider value={inlineEditCtx}>
       {page.doc.sections.map((section, index) =>
         editorContext ? (
           <SelectableSection
@@ -59,6 +81,7 @@ export function PageRenderer({ page, brandKit, editorContext }: PageRendererProp
           <SectionRenderer key={section.id} section={section} />
         ),
       )}
+      </InlineEditContext.Provider>
     </main>
   );
 }
