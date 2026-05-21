@@ -9,11 +9,13 @@ export function ServicesInspector({
   validationIssues = [],
   onChange,
   onVariantChange,
+  selectedItemIndex,
 }: {
   section: ServicesSection;
   validationIssues?: ValidationIssue[];
   onChange: (patch: SectionPropsPatch) => void;
   onVariantChange?: (variant: SectionVariant | undefined) => void;
+  selectedItemIndex?: number | null;
 }) {
   const { props } = section;
 
@@ -27,6 +29,7 @@ export function ServicesInspector({
         itemLabel="Service card"
         guidance="Recommended: 3–6 service cards"
         emptyMessage="No service cards yet. Add one to describe an offer."
+        selectedItemIndex={selectedItemIndex}
         items={props.services}
         createItem={() => ({ title: "New service", description: "Describe this service." })}
         onChange={(services) => onChange({ services })}

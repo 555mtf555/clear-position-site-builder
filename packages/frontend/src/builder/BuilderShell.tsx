@@ -3,8 +3,15 @@ import { createImportQaStatus } from "@clear-position/shared";
 import { Inspector } from "./Inspector";
 import { SectionList } from "./SectionList";
 import { usePageEditor } from "./usePageEditor";
+import type { ItemKind } from "../renderer/PageRenderer";
 import { PageRenderer } from "../renderer/PageRenderer";
 import { getSite } from "../api/client";
+
+interface SelectedPreviewItem {
+  sectionId: string;
+  itemKind: ItemKind;
+  itemIndex: number;
+}
 
 interface BuilderShellProps {
   pageId: string;
@@ -27,6 +34,7 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
   const editor = usePageEditor(pageId);
   const fromParam = useMemo(safeBackLink, []);
   const [derivedSiteHref, setDerivedSiteHref] = useState<string | null>(null);
+  const [selectedPreviewItem, setSelectedPreviewItem] = useState<SelectedPreviewItem | null>(null);
 
   // When there is no ?from= param, derive the dashboard URL from the page's site_id.
   useEffect(() => {
@@ -144,7 +152,14 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
             page={editor.draftPage}
             editorContext={{
               selectedSectionId: editor.selectedSectionId,
-              onSelectSection: editor.setSelectedSectionId,
+              onSelectSection: (id) => {
+                editor.setSelectedSectionId(id);
+                setSelectedPreviewItem(null);
+              },
+              onSelectItem: (sectionId, itemKind, itemIndex) => {
+                editor.setSelectedSectionId(sectionId);
+                setSelectedPreviewItem({ sectionId, itemKind, itemIndex });
+              },
             }}
           />
         </div>
@@ -165,6 +180,7 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
         section={editor.selectedSection}
         usedAssetIds={editor.usedAssetIds}
         validationIssues={editor.validationIssues}
+        selectedPreviewItem={selectedPreviewItem}
       />
     </div>
   );

@@ -9,11 +9,13 @@ export function ProcessInspector({
   validationIssues = [],
   onChange,
   onVariantChange,
+  selectedItemIndex,
 }: {
   section: ProcessSection;
   validationIssues?: ValidationIssue[];
   onChange: (patch: SectionPropsPatch) => void;
   onVariantChange?: (variant: SectionVariant | undefined) => void;
+  selectedItemIndex?: number | null;
 }) {
   const { props } = section;
 
@@ -27,6 +29,7 @@ export function ProcessInspector({
         itemLabel="Step"
         guidance="Recommended: 3 steps"
         emptyMessage="No process steps yet. Add steps to explain how you deliver the work."
+        selectedItemIndex={selectedItemIndex}
         items={props.steps}
         createItem={() => ({ title: "New step", description: "Describe this step." })}
         onChange={(steps) => onChange({ steps })}

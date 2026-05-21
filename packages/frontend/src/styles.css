@@ -3375,3 +3375,15 @@ details[open] .panel-summary-row > span:first-child::before {
   border-radius: 4px;
   position: relative;
 }
+
+/* Inspector item focus from preview click */
+.repeated-list__sortable-wrap--inspector-selected .repeated-list__drag-handle {
+  border-color: rgba(192, 124, 20, 0.45);
+  background: color-mix(in srgb, var(--cp-amber-faint, #fdf3e4) 70%, #f2f5f0);
+  color: var(--cp-amber, #c07c14);
+}
+
+.repeated-list__sortable-wrap--inspector-selected .repeated-list__item {
+  border-color: rgba(192, 124, 20, 0.4);
+  box-shadow: 0 0 0 2px rgba(192, 124, 20, 0.15);
+}

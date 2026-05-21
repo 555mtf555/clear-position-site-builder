@@ -27,7 +27,8 @@
       "Bash(sed -i 's|<article key={item.question}>|<article key={item.question} style={itemStyle\\(item.style\\)}>|' FaqSection.tsx)",
       "Bash(sed -i 's|<div className=\"metric\" key={`${metric.value}-${metric.label}`}>|<div className=\"metric\" key={`${metric.value}-${metric.label}`} style={itemStyle\\(metric.style\\)}>|' ProofSection.tsx)",
       "Bash(node -e ' *)",
-      "Bash(npm -w packages/frontend run typecheck)"
+      "Bash(npm -w packages/frontend run typecheck)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

@@ -338,4 +338,77 @@ describe("PageRenderer editor context", () => {
     );
     expect(container.querySelectorAll(".editor-selected")).toHaveLength(0);
   });
+
+  it("calls onSelectItem with kind='card' and index when a section-card is clicked", () => {
+    const onSelectSection = vi.fn();
+    const onSelectItem = vi.fn();
+    const pageWithServices: typeof page = {
+      ...page,
+      doc: {
+        ...page.doc,
+        sections: [
+          {
+            id: "services_1",
+            type: "services",
+            props: {
+              headline: "Services",
+              services: [
+                { title: "Alpha", description: "First." },
+                { title: "Beta", description: "Second." },
+                { title: "Gamma", description: "Third." },
+              ],
+            },
+            elements: [],
+          },
+        ],
+      },
+    };
+
+    const { container } = render(
+      <PageRenderer
+        page={pageWithServices}
+        editorContext={{ selectedSectionId: null, onSelectSection, onSelectItem }}
+      />,
+    );
+
+    const cards = container.querySelectorAll(".section-card");
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+    // Click the second card (index 1)
+    fireEvent.click(cards[1]!);
+    expect(onSelectSection).toHaveBeenCalledWith("services_1");
+    expect(onSelectItem).toHaveBeenCalledWith("services_1", "card", 1);
+  });
+
+  it("calls onSelectSection but not onSelectItem when clicking outside a card", () => {
+    const onSelectSection = vi.fn();
+    const onSelectItem = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: null, onSelectSection, onSelectItem }}
+      />,
+    );
+    // Click the section wrapper (hero heading)
+    const heroWrapper = container.querySelector("[data-section-id='hero_1']") as HTMLElement;
+    const heading = heroWrapper.querySelector("h1") as HTMLElement;
+    fireEvent.click(heading);
+    expect(onSelectSection).toHaveBeenCalledWith("hero_1");
+    // onSelectItem should NOT be called — heading is not a card/step/faq/metric
+    expect(onSelectItem).not.toHaveBeenCalled();
+  });
+
+  it("clicking a section from sidebar clears and does not call onSelectItem", () => {
+    const onSelectSection = vi.fn();
+    const onSelectItem = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: null, onSelectSection, onSelectItem }}
+      />,
+    );
+    const sectionWrapper = container.querySelector(".editor-selectable") as HTMLElement;
+    fireEvent.click(sectionWrapper);
+    expect(onSelectSection).toHaveBeenCalled();
+    expect(onSelectItem).not.toHaveBeenCalled();
+  });
 });

@@ -9,11 +9,13 @@ export function FaqInspector({
   validationIssues = [],
   onChange,
   onVariantChange,
+  selectedItemIndex,
 }: {
   section: FaqSection;
   validationIssues?: ValidationIssue[];
   onChange: (patch: SectionPropsPatch) => void;
   onVariantChange?: (variant: SectionVariant | undefined) => void;
+  selectedItemIndex?: number | null;
 }) {
   const { props } = section;
 
@@ -27,6 +29,7 @@ export function FaqInspector({
         itemLabel="FAQ item"
         guidance="Recommended: 3–6 questions"
         emptyMessage="No FAQ items yet. Add common questions buyers ask before getting started."
+        selectedItemIndex={selectedItemIndex}
         items={props.items}
         createItem={() => ({ question: "New question?", answer: "Answer the question." })}
         onChange={(items) => onChange({ items })}

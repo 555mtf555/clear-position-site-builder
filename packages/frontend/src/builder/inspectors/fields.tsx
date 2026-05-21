@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { ValidationIssue } from "../usePageEditor";
 
 export interface InspectorBaseProps<TProps> {
@@ -174,10 +174,11 @@ interface SortableItemRowProps {
   activeId: string | null;
   disabled: boolean;
   dragLabel: string;
+  isInspectorSelected: boolean;
   children: ReactNode;
 }
 
-function SortableItemRow({ id, activeId, disabled, dragLabel, children }: SortableItemRowProps) {
+function SortableItemRow({ id, activeId, disabled, dragLabel, isInspectorSelected, children }: SortableItemRowProps) {
   const {
     attributes,
     isDragging,
@@ -191,9 +192,12 @@ function SortableItemRow({ id, activeId, disabled, dragLabel, children }: Sortab
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      data-repeated-index={id}
+      data-selected-item={isInspectorSelected ? "true" : undefined}
       className={clsx("repeated-list__sortable-wrap", {
         "repeated-list__sortable-wrap--dragging": isDragging,
         "repeated-list__sortable-wrap--over": activeId && activeId !== id && !isDragging,
+        "repeated-list__sortable-wrap--inspector-selected": isInspectorSelected,
       })}
     >
       <button
@@ -223,6 +227,7 @@ export function RepeatedFieldList<T>({
   renderItem,
   guidance,
   emptyMessage,
+  selectedItemIndex,
 }: {
   label: string;
   /** Singular label used in the item legend and confirm dialog. Defaults to auto-singularized `label`. */
@@ -235,9 +240,27 @@ export function RepeatedFieldList<T>({
   guidance?: string;
   /** Message shown when the list is empty. */
   emptyMessage?: string;
+  /** When set, the matching item is highlighted and scrolled into view. */
+  selectedItemIndex?: number | null;
 }) {
   const singular = itemLabel ?? (label.endsWith("s") ? label.slice(0, -1) : label);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll the selected item into view when selectedItemIndex changes.
+  useEffect(() => {
+    if (selectedItemIndex == null || !containerRef.current) return;
+    const el = containerRef.current.querySelector(
+      `[data-repeated-index="${selectedItemIndex}"]`,
+    );
+    if (el) {
+      try {
+        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      } catch {
+        // jsdom / older environments may not support scrollIntoView options.
+      }
+    }
+  }, [selectedItemIndex]);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -283,7 +306,7 @@ export function RepeatedFieldList<T>({
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-          <div className="repeated-list__items">
+          <div className="repeated-list__items" ref={containerRef}>
             {items.map((item, index) => (
               <SortableItemRow
                 key={index}
@@ -291,6 +314,7 @@ export function RepeatedFieldList<T>({
                 activeId={activeId}
                 disabled={items.length <= 1}
                 dragLabel={`Drag to reorder ${singular.toLowerCase()}`}
+                isInspectorSelected={index === selectedItemIndex}
               >
                 <fieldset className="repeated-list__item">
                   <legend>{singular} {index + 1}</legend>

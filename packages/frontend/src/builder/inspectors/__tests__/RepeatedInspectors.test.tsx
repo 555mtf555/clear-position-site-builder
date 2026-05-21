@@ -305,6 +305,112 @@ describe("reorderItems helper", () => {
   });
 });
 
+describe("inspector item focus from preview selection", () => {
+  it("marks the matching item wrapper with data-selected-item when selectedItemIndex is set", () => {
+    const section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          { title: "Alpha", description: "First." },
+          { title: "Beta", description: "Second." },
+          { title: "Gamma", description: "Third." },
+        ],
+      },
+      elements: [],
+    };
+
+    const { container } = render(
+      <ServicesInspector
+        section={section}
+        onChange={() => undefined}
+        selectedItemIndex={1}
+      />,
+    );
+
+    const selected = container.querySelector("[data-selected-item='true']");
+    expect(selected).not.toBeNull();
+    expect(selected?.getAttribute("data-repeated-index")).toBe("1");
+  });
+
+  it("applies inspector-selected class to the matching wrapper", () => {
+    const section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          { title: "One", description: "A." },
+          { title: "Two", description: "B." },
+        ],
+      },
+      elements: [],
+    };
+
+    const { container } = render(
+      <ServicesInspector
+        section={section}
+        onChange={() => undefined}
+        selectedItemIndex={0}
+      />,
+    );
+
+    const selected = container.querySelector(".repeated-list__sortable-wrap--inspector-selected");
+    expect(selected).not.toBeNull();
+    expect(selected?.getAttribute("data-repeated-index")).toBe("0");
+  });
+
+  it("does not mark any item when selectedItemIndex is null", () => {
+    const section: ServicesSection = {
+      id: "services_1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "One", description: "First." }],
+      },
+      elements: [],
+    };
+
+    const { container } = render(
+      <ServicesInspector
+        section={section}
+        onChange={() => undefined}
+        selectedItemIndex={null}
+      />,
+    );
+
+    expect(container.querySelectorAll("[data-selected-item='true']")).toHaveLength(0);
+    expect(container.querySelectorAll(".repeated-list__sortable-wrap--inspector-selected")).toHaveLength(0);
+  });
+
+  it("each item wrapper carries a data-repeated-index for targeting", () => {
+    const section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "S",
+        services: [
+          { title: "A", description: "1." },
+          { title: "B", description: "2." },
+          { title: "C", description: "3." },
+        ],
+      },
+      elements: [],
+    };
+
+    const { container } = render(
+      <ServicesInspector section={section} onChange={() => undefined} />,
+    );
+
+    const wrappers = container.querySelectorAll("[data-repeated-index]");
+    expect(wrappers).toHaveLength(3);
+    expect(wrappers[0]?.getAttribute("data-repeated-index")).toBe("0");
+    expect(wrappers[1]?.getAttribute("data-repeated-index")).toBe("1");
+    expect(wrappers[2]?.getAttribute("data-repeated-index")).toBe("2");
+  });
+});
+
 describe("drag handle rendering", () => {
   it("renders a drag handle button for each service card", () => {
     const section: ServicesSection = {

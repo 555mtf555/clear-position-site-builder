@@ -9,11 +9,13 @@ export function ProofInspector({
   validationIssues = [],
   onChange,
   onVariantChange,
+  selectedItemIndex,
 }: {
   section: ProofSection;
   validationIssues?: ValidationIssue[];
   onChange: (patch: SectionPropsPatch) => void;
   onVariantChange?: (variant: SectionVariant | undefined) => void;
+  selectedItemIndex?: number | null;
 }) {
   const { props } = section;
 
@@ -28,6 +30,7 @@ export function ProofInspector({
         label="Metrics"
         itemLabel="Metric"
         emptyMessage="No proof metrics yet. Add verified results or leave this empty until proof is available."
+        selectedItemIndex={selectedItemIndex}
         items={props.metrics}
         createItem={() => ({ value: "1x", label: "new metric" })}
         onChange={(metrics) => onChange({ metrics })}

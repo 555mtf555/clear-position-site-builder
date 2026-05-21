@@ -9,6 +9,12 @@ import { ServicesInspector } from "./inspectors/ServicesInspector";
 import { SolutionInspector } from "./inspectors/SolutionInspector";
 import type { PageMetadataPatch, PageMetaPatch, SectionPropsPatch, ValidationIssue } from "./usePageEditor";
 
+interface SelectedPreviewItem {
+  sectionId: string;
+  itemKind: "card" | "step" | "faq" | "metric";
+  itemIndex: number;
+}
+
 interface InspectorProps {
   error: string | null;
   isDirty: boolean;
@@ -25,6 +31,8 @@ interface InspectorProps {
   section: Section | null;
   usedAssetIds: Set<string>;
   validationIssues: ValidationIssue[];
+  /** Item clicked in the preview canvas — drives focus inside repeated lists. */
+  selectedPreviewItem?: SelectedPreviewItem | null;
 }
 
 export function Inspector({
@@ -43,9 +51,18 @@ export function Inspector({
   section,
   usedAssetIds,
   validationIssues,
+  selectedPreviewItem,
 }: InspectorProps) {
   const sectionIssues = validationIssues.filter((issue) => issue.path.includes(".props."));
   const pageIssues = validationIssues.filter((issue) => !issue.path.includes(".props."));
+
+  // Compute the item index to focus inside a given repeated list kind.
+  const previewItemIndex = (kind: SelectedPreviewItem["itemKind"]): number | null => {
+    if (!selectedPreviewItem || !section) return null;
+    if (selectedPreviewItem.sectionId !== section.id) return null;
+    if (selectedPreviewItem.itemKind !== kind) return null;
+    return selectedPreviewItem.itemIndex;
+  };
 
   return (
     <aside className="builder-sidebar builder-sidebar--right">
@@ -131,22 +148,22 @@ export function Inspector({
         />
       ) : null}
       {section?.type === "problem" ? (
-        <ProblemInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
+        <ProblemInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} selectedItemIndex={previewItemIndex("card")} />
       ) : null}
       {section?.type === "solution" ? (
         <SolutionInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
       ) : null}
       {section?.type === "process" ? (
-        <ProcessInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
+        <ProcessInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} selectedItemIndex={previewItemIndex("step")} />
       ) : null}
       {section?.type === "proof" ? (
-        <ProofInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
+        <ProofInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} selectedItemIndex={previewItemIndex("metric")} />
       ) : null}
       {section?.type === "services" ? (
-        <ServicesInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
+        <ServicesInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} selectedItemIndex={previewItemIndex("card")} />
       ) : null}
       {section?.type === "faq" ? (
-        <FaqInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} />
+        <FaqInspector section={section} validationIssues={sectionIssues} onChange={onUpdateSection} onVariantChange={onVariantChange} selectedItemIndex={previewItemIndex("faq")} />
       ) : null}
       {section?.type === "final_cta" ? (
         <FinalCtaInspector

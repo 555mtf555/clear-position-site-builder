@@ -9,11 +9,13 @@ export function ProblemInspector({
   validationIssues = [],
   onChange,
   onVariantChange,
+  selectedItemIndex,
 }: {
   section: ProblemSection;
   validationIssues?: ValidationIssue[];
   onChange: (patch: SectionPropsPatch) => void;
   onVariantChange?: (variant: SectionVariant | undefined) => void;
+  selectedItemIndex?: number | null;
 }) {
   const { props } = section;
 
@@ -28,6 +30,7 @@ export function ProblemInspector({
         itemLabel="Problem card"
         guidance="Recommended: 3 problem cards"
         emptyMessage="No problem cards yet. Add buyer pain points from the discovery findings."
+        selectedItemIndex={selectedItemIndex}
         items={props.problems}
         createItem={() => ({ title: "New problem", description: "Describe the problem." })}
         onChange={(problems) => onChange({ problems })}

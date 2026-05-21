@@ -11,9 +11,14 @@ import { brandKitToCssVars } from "./brandTheme";
 
 // ── Editor context (absent = public/export mode, no selection UI) ─────────
 
+/** The kind of repeated item that was clicked in the preview. */
+export type ItemKind = "card" | "step" | "faq" | "metric";
+
 export interface EditorContext {
   selectedSectionId: string | null;
   onSelectSection: (sectionId: string) => void;
+  /** Called when a specific card/item is clicked inside a section. */
+  onSelectItem?: (sectionId: string, itemKind: ItemKind, itemIndex: number) => void;
 }
 
 interface PageRendererProps {
@@ -33,6 +38,7 @@ export function PageRenderer({ page, brandKit, editorContext }: PageRendererProp
             section={section}
             isSelected={section.id === editorContext.selectedSectionId}
             onSelect={() => editorContext.onSelectSection(section.id)}
+            onSelectItem={editorContext.onSelectItem}
           />
         ) : (
           <SectionRenderer key={section.id} section={section} />
@@ -61,10 +67,12 @@ function SelectableSection({
   section,
   isSelected,
   onSelect,
+  onSelectItem,
 }: {
   section: Section;
   isSelected: boolean;
   onSelect: () => void;
+  onSelectItem?: EditorContext["onSelectItem"];
 }) {
   const label = EDITOR_SECTION_LABELS[section.type] ?? section.type;
 
@@ -85,6 +93,21 @@ function SelectableSection({
     );
     if (itemEl && wrapper.contains(itemEl)) {
       itemEl.classList.add("editor-item-selected");
+
+      // Report item kind and index so the inspector can focus the matching item.
+      if (onSelectItem) {
+        const parent = itemEl.parentElement;
+        const siblings = parent ? Array.from(parent.children) : [];
+        const itemIndex = siblings.indexOf(itemEl as HTMLElement);
+        if (itemIndex >= 0) {
+          const kind: ItemKind =
+            itemEl.classList.contains("step-card") ? "step"
+            : itemEl.closest(".faq-list") ? "faq"
+            : itemEl.classList.contains("metric") ? "metric"
+            : "card";
+          onSelectItem(section.id, kind, itemIndex);
+        }
+      }
     }
   }
 
