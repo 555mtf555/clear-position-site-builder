@@ -3317,3 +3317,61 @@ details[open] .panel-summary-row > span:first-child::before {
   background: var(--cp-green-faint, #e5f0ea);
   color: var(--cp-green, #255741);
 }
+
+/* ── Preview click-to-select (editor mode only) ───────────────────────── */
+
+.editor-selectable {
+  position: relative;
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: outline-color 0.12s ease;
+}
+
+.editor-selectable:hover {
+  outline-color: rgba(37, 87, 65, 0.35);
+}
+
+/* Floating label badge on hover */
+.editor-selectable::before {
+  content: attr(data-editor-label);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  background: rgba(19, 30, 17, 0.8);
+  color: #c4e0bc;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 50;
+  white-space: nowrap;
+}
+
+.editor-selectable:hover::before {
+  opacity: 1;
+}
+
+/* Selected section */
+.editor-selected {
+  outline-color: var(--cp-green, #255741) !important;
+}
+
+.editor-selected::before {
+  opacity: 1 !important;
+  background: var(--cp-green, #255741);
+  color: #ffffff;
+}
+
+/* Selected item within a section (card/step/FAQ/metric) */
+.editor-item-selected {
+  outline: 2px solid var(--cp-amber, #c07c14) !important;
+  outline-offset: 2px;
+  border-radius: 4px;
+  position: relative;
+}

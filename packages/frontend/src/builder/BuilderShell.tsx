@@ -140,7 +140,13 @@ export function BuilderShell({ pageId }: BuilderShellProps) {
               </p>
             </div>
           ) : null}
-          <PageRenderer page={editor.draftPage} />
+          <PageRenderer
+            page={editor.draftPage}
+            editorContext={{
+              selectedSectionId: editor.selectedSectionId,
+              onSelectSection: editor.setSelectedSectionId,
+            }}
+          />
         </div>
       </main>
       <Inspector

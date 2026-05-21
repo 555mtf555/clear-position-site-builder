@@ -9,18 +9,94 @@ import { ServicesSection } from "./sections/ServicesSection";
 import { SolutionSection } from "./sections/SolutionSection";
 import { brandKitToCssVars } from "./brandTheme";
 
+// ── Editor context (absent = public/export mode, no selection UI) ─────────
+
+export interface EditorContext {
+  selectedSectionId: string | null;
+  onSelectSection: (sectionId: string) => void;
+}
+
 interface PageRendererProps {
   page: Page;
   brandKit?: BrandKit;
+  /** When provided, enables click-to-select in the editor canvas. */
+  editorContext?: EditorContext;
 }
 
-export function PageRenderer({ page, brandKit }: PageRendererProps) {
+export function PageRenderer({ page, brandKit, editorContext }: PageRendererProps) {
   return (
     <main className="page-renderer" aria-label={page.title} style={brandKitToCssVars(brandKit)}>
-      {page.doc.sections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
-      ))}
+      {page.doc.sections.map((section) =>
+        editorContext ? (
+          <SelectableSection
+            key={section.id}
+            section={section}
+            isSelected={section.id === editorContext.selectedSectionId}
+            onSelect={() => editorContext.onSelectSection(section.id)}
+          />
+        ) : (
+          <SectionRenderer key={section.id} section={section} />
+        ),
+      )}
     </main>
+  );
+}
+
+// ── Friendly label shown in the floating hover badge ──────────────────────
+
+const EDITOR_SECTION_LABELS: Record<string, string> = {
+  hero: "Hero",
+  problem: "Problem",
+  solution: "Solution",
+  process: "Process",
+  proof: "Proof",
+  services: "Services",
+  faq: "FAQ",
+  final_cta: "Final CTA",
+};
+
+// ── Selectable wrapper (editor mode only) ─────────────────────────────────
+
+function SelectableSection({
+  section,
+  isSelected,
+  onSelect,
+}: {
+  section: Section;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const label = EDITOR_SECTION_LABELS[section.type] ?? section.type;
+
+  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
+    // Prevent CTA / internal links from navigating in the editor canvas.
+    const link = (e.target as Element).closest("a");
+    if (link) e.preventDefault();
+
+    onSelect();
+
+    // Visual highlight for the clicked card/item (editor-only, no JSON change).
+    const wrapper = e.currentTarget;
+    wrapper.querySelectorAll(".editor-item-selected").forEach((el) => {
+      el.classList.remove("editor-item-selected");
+    });
+    const itemEl = (e.target as Element).closest(
+      ".section-card, .step-card, .faq-list article, .metric",
+    );
+    if (itemEl && wrapper.contains(itemEl)) {
+      itemEl.classList.add("editor-item-selected");
+    }
+  }
+
+  return (
+    <div
+      className={isSelected ? "editor-selectable editor-selected" : "editor-selectable"}
+      data-editor-label={label}
+      data-section-id={section.id}
+      onClick={handleClick}
+    >
+      <SectionRenderer section={section} />
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import type { BrandKit, Page } from "@clear-position/shared";
 import { PageRenderer } from "../PageRenderer";
 
@@ -273,5 +273,69 @@ describe("PageRenderer", () => {
       color: "#0f172a",
       "--cpsb-text": "#0f172a",
     });
+  });
+});
+
+describe("PageRenderer editor context", () => {
+  it("does not add editor-selectable elements when editorContext is absent", () => {
+    const { container } = render(<PageRenderer page={page} />);
+    expect(container.querySelectorAll(".editor-selectable")).toHaveLength(0);
+  });
+
+  it("wraps each section in an editor-selectable div when editorContext is provided", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: null, onSelectSection: vi.fn() }}
+      />,
+    );
+    expect(container.querySelectorAll(".editor-selectable").length).toBe(page.doc.sections.length);
+  });
+
+  it("adds editor-selected class to the section matching selectedSectionId", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: "hero_1", onSelectSection: vi.fn() }}
+      />,
+    );
+    const selected = container.querySelector(".editor-selected");
+    expect(selected).not.toBeNull();
+    expect(selected?.getAttribute("data-section-id")).toBe("hero_1");
+  });
+
+  it("calls onSelectSection with the section id when a selectable section is clicked", () => {
+    const onSelectSection = vi.fn();
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: null, onSelectSection }}
+      />,
+    );
+    const heroWrapper = container.querySelector("[data-section-id='hero_1']") as HTMLElement;
+    expect(heroWrapper).not.toBeNull();
+    fireEvent.click(heroWrapper);
+    expect(onSelectSection).toHaveBeenCalledWith("hero_1");
+  });
+
+  it("each selectable wrapper carries a data-editor-label attribute", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: null, onSelectSection: vi.fn() }}
+      />,
+    );
+    const heroWrapper = container.querySelector("[data-section-id='hero_1']");
+    expect(heroWrapper?.getAttribute("data-editor-label")).toBe("Hero");
+  });
+
+  it("no section has editor-selected when selectedSectionId does not match any section", () => {
+    const { container } = render(
+      <PageRenderer
+        page={page}
+        editorContext={{ selectedSectionId: "nonexistent_id", onSelectSection: vi.fn() }}
+      />,
+    );
+    expect(container.querySelectorAll(".editor-selected")).toHaveLength(0);
   });
 });
