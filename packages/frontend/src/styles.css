@@ -3518,3 +3518,15 @@ details[open] .panel-summary-row > span:first-child::before {
 
 .inspector-section__field-label{margin:10px 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--cp-ink-muted,#5a6d62)}
 .text-field-style-controls{display:grid;gap:10px}
+
+/* ── Card style actions (Phase 22: presets, copy/paste, apply-to-all) ── */
+.card-style-actions{display:grid;gap:8px;padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--cp-line,#c8d4c2)}
+.card-style-actions label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--cp-ink-muted,#5a6d62)}
+.card-style-actions label select{margin-top:2px}
+.card-style-actions__buttons{display:flex;gap:6px;flex-wrap:wrap}
+.card-style-actions__btn{font-size:11px;font-weight:600;padding:4px 10px;min-height:28px;border:1px solid var(--cp-line,#c8d4c2);border-radius:5px;background:#f5f7f4;color:var(--cp-ink,#12201a);cursor:pointer;transition:background .1s,border-color .1s,color .1s}
+.card-style-actions__btn:hover:not(:disabled){background:var(--cp-green-faint,#e5f0ea);border-color:var(--cp-green,#255741);color:var(--cp-green,#255741)}
+.card-style-actions__btn:disabled{opacity:.45;cursor:not-allowed}
+.card-style-actions__btn--reset:hover:not(:disabled){background:var(--cp-amber-faint,#fdf3e4);border-color:var(--cp-amber,#c07c14);color:var(--cp-amber,#c07c14)}
+.card-style-actions__apply-all{font-size:11px;font-weight:600;padding:5px 10px;min-height:28px;width:100%;border:1px dashed var(--cp-line,#c8d4c2);border-radius:5px;background:transparent;color:var(--cp-ink-muted,#5a6d62);cursor:pointer;text-align:left;transition:background .1s,border-color .1s,color .1s}
+.card-style-actions__apply-all:hover{background:var(--cp-amber-faint,#fdf3e4);border-color:var(--cp-amber,#c07c14);color:var(--cp-amber,#c07c14)}

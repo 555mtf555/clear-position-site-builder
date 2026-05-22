@@ -1,9 +1,19 @@
+import { useState } from "react";
 import type { ProofSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
 import { TextFieldStyleControls } from "./TextFieldStyleControls";
+import { CardStyleActions } from "./CardStyleActions";
+import {
+  CARD_PRESETS,
+  getMetricSnapshot,
+  applyMetricSnapshot,
+  applyMetricPreset,
+  clearMetricStyle,
+} from "./itemStylePresets";
+import type { ItemStyleSnapshot } from "./itemStylePresets";
 
 export function ProofInspector({
   section,
@@ -19,6 +29,7 @@ export function ProofInspector({
   selectedItemIndex?: number | null;
 }) {
   const { props } = section;
+  const [clipboard, setClipboard] = useState<ItemStyleSnapshot | null>(null);
 
   return (
     <form className="inspector-form" aria-label="Proof inspector">
@@ -52,6 +63,25 @@ export function ProofInspector({
             <details className="inspector-section">
               <summary>Metric style</summary>
               <div className="inspector-section__body">
+                <CardStyleActions
+                  kind="metric"
+                  clipboard={clipboard}
+                  itemsLabel="metrics"
+                  onApplyPreset={(id) => {
+                    const preset = CARD_PRESETS.find((p) => p.id === id);
+                    if (preset) updateMetric(applyMetricPreset(metric, preset));
+                  }}
+                  onCopyStyle={() => setClipboard(getMetricSnapshot(metric))}
+                  onPasteStyle={() => {
+                    if (clipboard?.kind === "metric") updateMetric(applyMetricSnapshot(metric, clipboard));
+                  }}
+                  onResetStyle={() => updateMetric(clearMetricStyle(metric))}
+                  onApplyToAll={() => {
+                    if (!window.confirm("Apply this metric's style to all metrics in this section? This will replace their current metric/text styles.")) return;
+                    const snap = getMetricSnapshot(metric);
+                    onChange({ metrics: props.metrics.map((m) => applyMetricSnapshot(m, snap)) });
+                  }}
+                />
                 <ItemStyleControls
                   style={metric.style}
                   onChange={(style) => updateMetric({ ...metric, style })}

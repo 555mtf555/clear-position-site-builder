@@ -472,3 +472,212 @@ describe("drag handle rendering", () => {
     expect(validPageWith(section)).toBe(true);
   });
 });
+
+describe("CardStyleActions — preset / copy / paste / reset / apply-to-all", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("renders style preset dropdown and action buttons inside Card style panel", () => {
+    const section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "Fast." }],
+      },
+      elements: [],
+    };
+    render(<ServicesInspector section={section} onChange={() => undefined} />);
+
+    const stylePanel = screen.getByText("Card style").closest("details")!;
+    fireEvent.click(within(stylePanel).getByText("Card style"));
+
+    expect(within(stylePanel).getByLabelText("Style preset")).toBeInTheDocument();
+    expect(within(stylePanel).getByRole("button", { name: "Copy style" })).toBeInTheDocument();
+    expect(within(stylePanel).getByRole("button", { name: "Paste style" })).toBeInTheDocument();
+    expect(within(stylePanel).getByRole("button", { name: "Reset style" })).toBeInTheDocument();
+    expect(within(stylePanel).getByRole("button", { name: /Apply this style to all/ })).toBeInTheDocument();
+  });
+
+  it("applying a preset sets style fields but preserves text content", () => {
+    let section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "Fast." }],
+      },
+      elements: [],
+    };
+    render(<ServicesInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanel = screen.getByText("Card style").closest("details")!;
+    fireEvent.click(within(stylePanel).getByText("Card style"));
+    fireEvent.change(within(stylePanel).getByLabelText("Style preset"), {
+      target: { value: "dark-feature" },
+    });
+
+    expect(section.props.services[0]?.title).toBe("Sprint");
+    expect(section.props.services[0]?.description).toBe("Fast.");
+    expect(section.props.services[0]?.style?.background_color).toBe("#1a2318");
+    expect(section.props.services[0]?.title_style?.color).toBe("#c4e0bc");
+  });
+
+  it("reset style removes all style fields but preserves text", () => {
+    let section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{
+          title: "Sprint",
+          description: "Fast.",
+          style: { background_color: "#1a2318" },
+          title_style: { color: "#c4e0bc", weight: "bold" },
+        }],
+      },
+      elements: [],
+    };
+    render(<ServicesInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanel = screen.getByText("Card style").closest("details")!;
+    fireEvent.click(within(stylePanel).getByText("Card style"));
+    fireEvent.click(within(stylePanel).getByRole("button", { name: "Reset style" }));
+
+    expect(section.props.services[0]?.title).toBe("Sprint");
+    expect(section.props.services[0]?.style).toBeUndefined();
+    expect(section.props.services[0]?.title_style).toBeUndefined();
+  });
+
+  it("paste is disabled when clipboard is empty", () => {
+    const section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "Fast." }],
+      },
+      elements: [],
+    };
+    render(<ServicesInspector section={section} onChange={() => undefined} />);
+
+    const stylePanel = screen.getByText("Card style").closest("details")!;
+    fireEvent.click(within(stylePanel).getByText("Card style"));
+
+    expect(within(stylePanel).getByRole("button", { name: "Paste style" })).toBeDisabled();
+  });
+
+  it("paste becomes enabled after copying", () => {
+    let section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [{ title: "Sprint", description: "Fast.", style: { background_color: "#1a2318" } }],
+      },
+      elements: [],
+    };
+    const { rerender } = render(<ServicesInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanel = screen.getByText("Card style").closest("details")!;
+    fireEvent.click(within(stylePanel).getByText("Card style"));
+
+    expect(within(stylePanel).getByRole("button", { name: "Paste style" })).toBeDisabled();
+    fireEvent.click(within(stylePanel).getByRole("button", { name: "Copy style" }));
+    rerender(<ServicesInspector section={section} onChange={() => undefined} />);
+    expect(within(stylePanel).getByRole("button", { name: "Paste style" })).not.toBeDisabled();
+  });
+
+  it("apply-to-all copies style to all sibling items but not text content", () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+
+    let section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          { title: "Sprint", description: "Fast.", style: { background_color: "#1a2318" }, title_style: { color: "#c4e0bc" } },
+          { title: "Build", description: "Structured." },
+        ],
+      },
+      elements: [],
+    };
+    render(<ServicesInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanels = screen.getAllByText("Card style");
+    fireEvent.click(stylePanels[0]!.closest("details")!.querySelector("summary")!);
+    const firstStylePanel = stylePanels[0]!.closest("details")!;
+    fireEvent.click(within(firstStylePanel).getByRole("button", { name: /Apply this style to all/ }));
+
+    expect(window.confirm).toHaveBeenCalled();
+    // Both services should now have the same style but different text
+    expect(section.props.services[0]?.title).toBe("Sprint");
+    expect(section.props.services[1]?.title).toBe("Build");
+    expect(section.props.services[1]?.style?.background_color).toBe("#1a2318");
+    expect(section.props.services[1]?.title_style?.color).toBe("#c4e0bc");
+  });
+
+  it("apply-to-all is cancelled when user dismisses confirm", () => {
+    vi.stubGlobal("confirm", vi.fn(() => false));
+
+    let section: ServicesSection = {
+      id: "s1",
+      type: "services",
+      props: {
+        headline: "Services",
+        services: [
+          { title: "Sprint", description: "Fast.", style: { background_color: "#1a2318" } },
+          { title: "Build", description: "Structured." },
+        ],
+      },
+      elements: [],
+    };
+    render(<ServicesInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanels = screen.getAllByText("Card style");
+    fireEvent.click(stylePanels[0]!.closest("details")!.querySelector("summary")!);
+    const firstStylePanel = stylePanels[0]!.closest("details")!;
+    fireEvent.click(within(firstStylePanel).getByRole("button", { name: /Apply this style to all/ }));
+
+    // Second card unchanged
+    expect(section.props.services[1]?.style).toBeUndefined();
+  });
+
+  it("FAQ preset applies to question_style and answer_style", () => {
+    let section: FaqSection = {
+      id: "faq_1",
+      type: "faq",
+      props: {
+        headline: "FAQ",
+        items: [{ question: "Q?", answer: "A." }],
+      },
+      elements: [],
+    };
+    render(<FaqInspector section={section} onChange={(patch) => {
+      section = { ...section, props: { ...section.props, ...patch } };
+    }} />);
+
+    const stylePanel = screen.getByText("Item style").closest("details")!;
+    fireEvent.click(within(stylePanel).getByText("Item style"));
+    fireEvent.change(within(stylePanel).getByLabelText("Style preset"), {
+      target: { value: "green-accent" },
+    });
+
+    expect(section.props.items[0]?.question).toBe("Q?");
+    expect(section.props.items[0]?.style?.background_color).toBe("#e5f0ea");
+    expect(section.props.items[0]?.question_style?.color).toBe("#255741");
+    expect(section.props.items[0]?.answer_style?.color).toBe("#394136");
+  });
+});

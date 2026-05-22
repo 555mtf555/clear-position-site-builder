@@ -1,9 +1,19 @@
+import { useState } from "react";
 import type { ServicesSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
 import { TextFieldStyleControls } from "./TextFieldStyleControls";
+import { CardStyleActions } from "./CardStyleActions";
+import {
+  CARD_PRESETS,
+  getCardSnapshot,
+  applyCardSnapshot,
+  applyCardPreset,
+  clearCardStyle,
+} from "./itemStylePresets";
+import type { ItemStyleSnapshot } from "./itemStylePresets";
 
 export function ServicesInspector({
   section,
@@ -19,6 +29,7 @@ export function ServicesInspector({
   selectedItemIndex?: number | null;
 }) {
   const { props } = section;
+  const [clipboard, setClipboard] = useState<ItemStyleSnapshot | null>(null);
 
   return (
     <form className="inspector-form" aria-label="Services inspector">
@@ -51,6 +62,25 @@ export function ServicesInspector({
             <details className="inspector-section">
               <summary>Card style</summary>
               <div className="inspector-section__body">
+                <CardStyleActions
+                  kind="card"
+                  clipboard={clipboard}
+                  itemsLabel="cards"
+                  onApplyPreset={(id) => {
+                    const preset = CARD_PRESETS.find((p) => p.id === id);
+                    if (preset) updateService(applyCardPreset(service, preset));
+                  }}
+                  onCopyStyle={() => setClipboard(getCardSnapshot(service))}
+                  onPasteStyle={() => {
+                    if (clipboard?.kind === "card") updateService(applyCardSnapshot(service, clipboard));
+                  }}
+                  onResetStyle={() => updateService(clearCardStyle(service))}
+                  onApplyToAll={() => {
+                    if (!window.confirm("Apply this card's style to all cards in this section? This will replace their current card/text styles.")) return;
+                    const snap = getCardSnapshot(service);
+                    onChange({ services: props.services.map((s) => applyCardSnapshot(s, snap)) });
+                  }}
+                />
                 <ItemStyleControls
                   style={service.style}
                   onChange={(style) => updateService({ ...service, style })}

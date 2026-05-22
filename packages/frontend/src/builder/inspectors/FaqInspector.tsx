@@ -1,9 +1,19 @@
+import { useState } from "react";
 import type { FaqSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
 import { TextFieldStyleControls } from "./TextFieldStyleControls";
+import { CardStyleActions } from "./CardStyleActions";
+import {
+  CARD_PRESETS,
+  getFaqSnapshot,
+  applyFaqSnapshot,
+  applyFaqPreset,
+  clearFaqStyle,
+} from "./itemStylePresets";
+import type { ItemStyleSnapshot } from "./itemStylePresets";
 
 export function FaqInspector({
   section,
@@ -19,6 +29,7 @@ export function FaqInspector({
   selectedItemIndex?: number | null;
 }) {
   const { props } = section;
+  const [clipboard, setClipboard] = useState<ItemStyleSnapshot | null>(null);
 
   return (
     <form className="inspector-form" aria-label="FAQ inspector">
@@ -51,6 +62,25 @@ export function FaqInspector({
             <details className="inspector-section">
               <summary>Item style</summary>
               <div className="inspector-section__body">
+                <CardStyleActions
+                  kind="faq"
+                  clipboard={clipboard}
+                  itemsLabel="items"
+                  onApplyPreset={(id) => {
+                    const preset = CARD_PRESETS.find((p) => p.id === id);
+                    if (preset) updateItem(applyFaqPreset(item, preset));
+                  }}
+                  onCopyStyle={() => setClipboard(getFaqSnapshot(item))}
+                  onPasteStyle={() => {
+                    if (clipboard?.kind === "faq") updateItem(applyFaqSnapshot(item, clipboard));
+                  }}
+                  onResetStyle={() => updateItem(clearFaqStyle(item))}
+                  onApplyToAll={() => {
+                    if (!window.confirm("Apply this item's style to all items in this section? This will replace their current item/text styles.")) return;
+                    const snap = getFaqSnapshot(item);
+                    onChange({ items: props.items.map((it) => applyFaqSnapshot(it, snap)) });
+                  }}
+                />
                 <ItemStyleControls
                   style={item.style}
                   onChange={(style) => updateItem({ ...item, style })}

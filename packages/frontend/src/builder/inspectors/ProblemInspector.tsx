@@ -1,9 +1,19 @@
+import { useState } from "react";
 import type { ProblemSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
 import { TextFieldStyleControls } from "./TextFieldStyleControls";
+import { CardStyleActions } from "./CardStyleActions";
+import {
+  CARD_PRESETS,
+  getCardSnapshot,
+  applyCardSnapshot,
+  applyCardPreset,
+  clearCardStyle,
+} from "./itemStylePresets";
+import type { ItemStyleSnapshot } from "./itemStylePresets";
 
 export function ProblemInspector({
   section,
@@ -19,6 +29,7 @@ export function ProblemInspector({
   selectedItemIndex?: number | null;
 }) {
   const { props } = section;
+  const [clipboard, setClipboard] = useState<ItemStyleSnapshot | null>(null);
 
   return (
     <form className="inspector-form" aria-label="Problem inspector">
@@ -52,6 +63,25 @@ export function ProblemInspector({
             <details className="inspector-section">
               <summary>Card style</summary>
               <div className="inspector-section__body">
+                <CardStyleActions
+                  kind="card"
+                  clipboard={clipboard}
+                  itemsLabel="cards"
+                  onApplyPreset={(id) => {
+                    const preset = CARD_PRESETS.find((p) => p.id === id);
+                    if (preset) updateProblem(applyCardPreset(problem, preset));
+                  }}
+                  onCopyStyle={() => setClipboard(getCardSnapshot(problem))}
+                  onPasteStyle={() => {
+                    if (clipboard?.kind === "card") updateProblem(applyCardSnapshot(problem, clipboard));
+                  }}
+                  onResetStyle={() => updateProblem(clearCardStyle(problem))}
+                  onApplyToAll={() => {
+                    if (!window.confirm("Apply this card's style to all cards in this section? This will replace their current card/text styles.")) return;
+                    const snap = getCardSnapshot(problem);
+                    onChange({ problems: props.problems.map((p) => applyCardSnapshot(p, snap)) });
+                  }}
+                />
                 <ItemStyleControls
                   style={problem.style}
                   onChange={(style) => updateProblem({ ...problem, style })}

@@ -1,9 +1,19 @@
+import { useState } from "react";
 import type { ProcessSection, SectionVariant } from "@clear-position/shared";
 import type { SectionPropsPatch, ValidationIssue } from "../usePageEditor";
 import { issueForPath, RepeatedFieldList, TextAreaField, TextField } from "./fields";
 import { SectionStyleControls } from "./SectionStyleControls";
 import { ItemStyleControls } from "./ItemStyleControls";
 import { TextFieldStyleControls } from "./TextFieldStyleControls";
+import { CardStyleActions } from "./CardStyleActions";
+import {
+  CARD_PRESETS,
+  getCardSnapshot,
+  applyCardSnapshot,
+  applyCardPreset,
+  clearCardStyle,
+} from "./itemStylePresets";
+import type { ItemStyleSnapshot } from "./itemStylePresets";
 
 export function ProcessInspector({
   section,
@@ -19,6 +29,7 @@ export function ProcessInspector({
   selectedItemIndex?: number | null;
 }) {
   const { props } = section;
+  const [clipboard, setClipboard] = useState<ItemStyleSnapshot | null>(null);
 
   return (
     <form className="inspector-form" aria-label="Process inspector">
@@ -51,6 +62,25 @@ export function ProcessInspector({
             <details className="inspector-section">
               <summary>Step style</summary>
               <div className="inspector-section__body">
+                <CardStyleActions
+                  kind="card"
+                  clipboard={clipboard}
+                  itemsLabel="steps"
+                  onApplyPreset={(id) => {
+                    const preset = CARD_PRESETS.find((p) => p.id === id);
+                    if (preset) updateStep(applyCardPreset(step, preset));
+                  }}
+                  onCopyStyle={() => setClipboard(getCardSnapshot(step))}
+                  onPasteStyle={() => {
+                    if (clipboard?.kind === "card") updateStep(applyCardSnapshot(step, clipboard));
+                  }}
+                  onResetStyle={() => updateStep(clearCardStyle(step))}
+                  onApplyToAll={() => {
+                    if (!window.confirm("Apply this step's style to all steps in this section? This will replace their current card/text styles.")) return;
+                    const snap = getCardSnapshot(step);
+                    onChange({ steps: props.steps.map((s) => applyCardSnapshot(s, snap)) });
+                  }}
+                />
                 <ItemStyleControls
                   style={step.style}
                   onChange={(style) => updateStep({ ...step, style })}
